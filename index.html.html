@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ArcMap 10.8 desde Cero | Curso completo</title>
+  <meta name="description" content="Portada general del curso ArcMap 10.8 desde Cero con descarga de datos geográficos, sensores remotos y NDVI aplicado a Colombia." />
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+    :root {
+      --azul-oscuro: #1F4E79;
+      --azul-medio: #2E75B6;
+      --azul-claro: #D6E4F0;
+      --verde: #1E6B1E;
+      --verde-claro: #E8F5E9;
+      --naranja: #C55A11;
+      --naranja-claro: #FDE9D9;
+      --gris-claro: #F2F2F2;
+      --gris-medio: #6b7280;
+      --gris-texto: #1f2937;
+      --blanco: #ffffff;
+      --sombra: 0 14px 35px rgba(31, 78, 121, 0.13);
+      --sombra-hover: 0 22px 48px rgba(31, 78, 121, 0.22);
+      --radio: 22px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: "Inter", Arial, sans-serif;
+      color: var(--gris-texto);
+      background: #ffffff;
+      line-height: 1.6;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .container {
+      width: min(1120px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+
+    .hero {
+      position: relative;
+      min-height: 92vh;
+      display: flex;
+      align-items: center;
+      color: var(--blanco);
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 18% 25%, rgba(255,255,255,0.18), transparent 32%),
+        radial-gradient(circle at 85% 15%, rgba(214,228,240,0.18), transparent 26%),
+        linear-gradient(135deg, #1F4E79 0%, #2E75B6 56%, #18415f 100%);
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(120deg, rgba(0,0,0,0.22), rgba(0,0,0,0.05)),
+        repeating-linear-gradient(
+          45deg,
+          rgba(255,255,255,0.04) 0,
+          rgba(255,255,255,0.04) 1px,
+          transparent 1px,
+          transparent 18px
+        );
+      pointer-events: none;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      width: 520px;
+      height: 520px;
+      right: -180px;
+      bottom: -200px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.10);
+      filter: blur(1px);
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      max-width: 920px;
+      padding: 72px 0;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      padding: 8px 14px;
+      border: 1px solid rgba(255,255,255,0.32);
+      border-radius: 999px;
+      background: rgba(255,255,255,0.12);
+      backdrop-filter: blur(8px);
+      font-size: 0.9rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      margin-bottom: 24px;
+    }
+
+    .hero h1 {
+      font-size: clamp(2.45rem, 6vw, 5.2rem);
+      line-height: 0.98;
+      letter-spacing: -0.055em;
+      margin-bottom: 24px;
+      max-width: 1050px;
+    }
+
+    .hero .subtitle {
+      font-size: clamp(1.05rem, 2.2vw, 1.35rem);
+      color: rgba(255,255,255,0.84);
+      max-width: 780px;
+      margin-bottom: 28px;
+    }
+
+    .badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 34px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 15px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.16);
+      border: 1px solid rgba(255,255,255,0.24);
+      font-weight: 700;
+      backdrop-filter: blur(8px);
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      min-height: 48px;
+      padding: 13px 20px;
+      border-radius: 14px;
+      font-weight: 800;
+      transition: transform 0.22s ease, box-shadow 0.22s ease, background 0.22s ease, color 0.22s ease;
+      border: 0;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: #ffffff;
+      color: var(--azul-oscuro);
+      box-shadow: 0 16px 32px rgba(0,0,0,0.18);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 22px 42px rgba(0,0,0,0.24);
+    }
+
+    .btn-blue {
+      background: var(--azul-medio);
+      color: #ffffff;
+      box-shadow: 0 12px 24px rgba(46,117,182,0.26);
+    }
+
+    .btn-blue:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 18px 34px rgba(46,117,182,0.34);
+      background: var(--azul-oscuro);
+    }
+
+    .btn-disabled {
+      background: #e5e7eb;
+      color: #6b7280;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .hero-note {
+      color: rgba(255,255,255,0.78);
+      font-weight: 600;
+    }
+
+    section {
+      padding: 76px 0;
+    }
+
+    .section-header {
+      max-width: 780px;
+      margin-bottom: 34px;
+    }
+
+    .section-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--azul-medio);
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 0.78rem;
+      margin-bottom: 10px;
+    }
+
+    h2 {
+      color: var(--azul-oscuro);
+      font-size: clamp(1.8rem, 3vw, 2.65rem);
+      line-height: 1.12;
+      letter-spacing: -0.03em;
+      margin-bottom: 12px;
+    }
+
+    .section-description {
+      color: #4b5563;
+      font-size: 1.04rem;
+    }
+
+    .grid {
+      display: grid;
+      gap: 22px;
+    }
+
+    .grid-4 {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .grid-3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .grid-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .card {
+      background: #ffffff;
+      border: 1px solid rgba(31,78,121,0.09);
+      border-radius: var(--radio);
+      padding: 24px;
+      box-shadow: 0 8px 28px rgba(31, 78, 121, 0.08);
+      transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-6px);
+      box-shadow: var(--sombra-hover);
+      border-color: rgba(46,117,182,0.22);
+    }
+
+    .icon {
+      width: 52px;
+      height: 52px;
+      display: grid;
+      place-items: center;
+      border-radius: 16px;
+      font-size: 1.55rem;
+      background: var(--azul-claro);
+      margin-bottom: 16px;
+    }
+
+    .card h3 {
+      color: var(--azul-oscuro);
+      font-size: 1.08rem;
+      margin-bottom: 8px;
+      line-height: 1.25;
+    }
+
+    .card p {
+      color: #4b5563;
+      font-size: 0.96rem;
+    }
+
+    .learning {
+      background: linear-gradient(180deg, #ffffff 0%, #f8fbfd 100%);
+    }
+
+    .learning-box {
+      background: var(--azul-claro);
+      border-radius: 28px;
+      padding: clamp(24px, 4vw, 38px);
+      box-shadow: var(--sombra);
+      border: 1px solid rgba(31,78,121,0.1);
+    }
+
+    .check-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px 24px;
+      list-style: none;
+      margin-top: 18px;
+    }
+
+    .check-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      background: rgba(255,255,255,0.62);
+      padding: 12px 14px;
+      border-radius: 14px;
+      color: #233142;
+      font-weight: 600;
+    }
+
+    .check {
+      display: inline-grid;
+      place-items: center;
+      flex: 0 0 23px;
+      width: 23px;
+      height: 23px;
+      border-radius: 50%;
+      background: var(--verde);
+      color: white;
+      font-size: 0.85rem;
+      margin-top: 1px;
+    }
+
+    .modules {
+      background: #ffffff;
+    }
+
+    .module-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 22px;
+    }
+
+    .module-card {
+      position: relative;
+      display: flex;
+      gap: 18px;
+      align-items: flex-start;
+      min-height: 100%;
+    }
+
+    .module-number {
+      flex: 0 0 54px;
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, var(--azul-oscuro), var(--azul-medio));
+      color: white;
+      font-weight: 900;
+      font-size: 1.18rem;
+      box-shadow: 0 12px 26px rgba(31,78,121,0.24);
+    }
+
+    .module-body {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .module-top {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .module-title {
+      color: var(--azul-oscuro);
+      font-size: 1.18rem;
+      line-height: 1.22;
+      font-weight: 850;
+      margin: 0;
+    }
+
+    .duration {
+      flex: 0 0 auto;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 10px;
+      background: #f3f7fb;
+      color: var(--azul-oscuro);
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 800;
+    }
+
+    .topics {
+      list-style: none;
+      display: grid;
+      gap: 7px;
+      margin: 15px 0 18px;
+      color: #4b5563;
+      font-size: 0.94rem;
+    }
+
+    .topics li {
+      display: flex;
+      gap: 8px;
+    }
+
+    .topics li::before {
+      content: "•";
+      color: var(--naranja);
+      font-weight: 900;
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: var(--verde-claro);
+      color: var(--verde);
+      font-size: 0.78rem;
+      font-weight: 850;
+      margin-bottom: 12px;
+    }
+
+    .status.pending {
+      background: #f3f4f6;
+      color: #6b7280;
+    }
+
+    .project {
+      background: var(--verde);
+      color: white;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .project::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 8% 10%, rgba(255,255,255,0.13), transparent 28%),
+        radial-gradient(circle at 92% 90%, rgba(255,255,255,0.11), transparent 34%);
+      pointer-events: none;
+    }
+
+    .project .container {
+      position: relative;
+      z-index: 1;
+    }
+
+    .project h2,
+    .project .section-kicker,
+    .project .section-description {
+      color: white;
+    }
+
+    .project .section-description {
+      color: rgba(255,255,255,0.88);
+    }
+
+    .deliverables {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      list-style: none;
+      margin-top: 30px;
+    }
+
+    .deliverables li {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      padding: 14px;
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(255,255,255,0.10);
+      border-radius: 16px;
+      color: rgba(255,255,255,0.95);
+      font-weight: 650;
+      backdrop-filter: blur(8px);
+    }
+
+    .requirements {
+      background: #f8fafc;
+    }
+
+    .requirement-card {
+      text-align: center;
+    }
+
+    .requirement-card .icon {
+      margin-left: auto;
+      margin-right: auto;
+      background: var(--verde-claro);
+    }
+
+    .footer {
+      background: var(--azul-oscuro);
+      color: white;
+      padding: 36px 0;
+    }
+
+    .footer-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+
+    .footer p {
+      color: rgba(255,255,255,0.82);
+    }
+
+    .footer strong {
+      display: block;
+      margin-bottom: 4px;
+      color: #ffffff;
+    }
+
+    .top-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.18);
+      font-weight: 800;
+      transition: background 0.22s ease, transform 0.22s ease;
+    }
+
+    .top-link:hover {
+      background: rgba(255,255,255,0.2);
+      transform: translateY(-2px);
+    }
+
+    @media (max-width: 980px) {
+      .grid-4,
+      .deliverables {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .grid-3 {
+        grid-template-columns: 1fr;
+      }
+
+      .module-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .hero {
+        min-height: auto;
+      }
+
+      .hero-content {
+        padding: 74px 0 62px;
+      }
+
+      .hero h1 {
+        letter-spacing: -0.04em;
+      }
+
+      .grid-4,
+      .grid-2,
+      .check-list,
+      .deliverables {
+        grid-template-columns: 1fr;
+      }
+
+      section {
+        padding: 56px 0;
+      }
+
+      .module-card {
+        flex-direction: column;
+      }
+
+      .module-top {
+        flex-direction: column;
+      }
+
+      .btn {
+        width: 100%;
+      }
+
+      .hero-actions {
+        align-items: stretch;
+      }
+    }
+
+    @media print {
+      .btn,
+      .top-link {
+        box-shadow: none !important;
+      }
+
+      .card,
+      .module-card {
+        break-inside: avoid;
+      }
+    }
+  </style>
+</head>
+
+<body id="inicio">
+  <header class="hero">
+    <div class="container">
+      <div class="hero-content">
+        <div class="eyebrow">🗺️ Curso aplicado a Colombia</div>
+
+        <h1>ArcMap 10.8 desde Cero con Descarga de Datos Geográficos, Sensores Remotos y NDVI aplicado a Colombia</h1>
+
+        <p class="subtitle">
+          Aprende SIG desde cero, descarga datos reales de Colombia y crea mapas profesionales con análisis NDVI incluido.
+        </p>
+
+        <div class="badges" aria-label="Información general del curso">
+          <span class="badge">⏱️ 20 horas</span>
+          <span class="badge">🌱 Nivel principiante</span>
+          <span class="badge">🖥️ ArcMap 10.8</span>
+        </div>
+
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="modulo1.html">Comenzar el curso →</a>
+          <span class="hero-note">Módulo 1 activado · Guías restantes próximamente</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section id="sobre">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-kicker">📌 Sobre el curso</span>
+          <h2>Una ruta práctica para aprender ArcMap con datos reales</h2>
+          <p class="section-description">
+            Este curso está diseñado para personas que inician desde cero en SIG y necesitan trabajar con información territorial de Colombia. A través de ejercicios guiados, aprenderás a organizar datos, preparar capas, procesar información vectorial y ráster, calcular NDVI y exportar mapas profesionales.
+          </p>
+        </div>
+
+        <div class="grid grid-4">
+          <article class="card">
+            <div class="icon">🇨🇴</div>
+            <h3>Datos reales de Colombia</h3>
+            <p>Uso de fuentes como IGAC, DANE, IDEAM, Datos Abiertos Colombia y OpenStreetMap.</p>
+          </article>
+
+          <article class="card">
+            <div class="icon">🛰️</div>
+            <h3>Imágenes satelitales</h3>
+            <p>Trabajo con Landsat 8/9 y Sentinel-2 para composiciones RGB y análisis territorial.</p>
+          </article>
+
+          <article class="card">
+            <div class="icon">🌿</div>
+            <h3>NDVI paso a paso</h3>
+            <p>Cálculo e interpretación del índice de vegetación usando Raster Calculator y Float().</p>
+          </article>
+
+          <article class="card">
+            <div class="icon">📄</div>
+            <h3>Proyecto final</h3>
+            <p>Entrega final con 7 mapas en PDF y un informe de interpretación territorial.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="learning" id="aprendizajes">
+      <div class="container">
+        <div class="learning-box">
+          <div class="section-header">
+            <span class="section-kicker">✅ Lo que aprenderás</span>
+            <h2>Competencias prácticas al finalizar</h2>
+            <p class="section-description">
+              Al completar el curso podrás crear un flujo de trabajo completo en ArcMap, desde la descarga de datos hasta la presentación cartográfica final.
+            </p>
+          </div>
+
+          <ul class="check-list">
+            <li><span class="check">✓</span> Descargar datos geográficos oficiales de Colombia</li>
+            <li><span class="check">✓</span> Proyectar capas en Magna-SIRGAS / CTM12</li>
+            <li><span class="check">✓</span> Crear mapas base con simbología y etiquetas</li>
+            <li><span class="check">✓</span> Usar herramientas de geoprocesamiento como Clip, Buffer e Intersect</li>
+            <li><span class="check">✓</span> Generar hillshade, pendiente y curvas de nivel desde un DEM</li>
+            <li><span class="check">✓</span> Crear composiciones RGB en color natural y falso color</li>
+            <li><span class="check">✓</span> Calcular e interpretar el NDVI</li>
+            <li><span class="check">✓</span> Diseñar mapas profesionales en Layout View</li>
+            <li><span class="check">✓</span> Exportar mapas en PDF a 300 dpi</li>
+            <li><span class="check">✓</span> Unir tablas de Excel o CSV a datos geográficos</li>
+            <li><span class="check">✓</span> Digitalizar y editar información vectorial</li>
+            <li><span class="check">✓</span> Presentar un análisis territorial completo</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="modules" id="modulos">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-kicker">📚 Contenido del curso</span>
+          <h2>Índice navegable de guías</h2>
+          <p class="section-description">
+            El Módulo 1 ya está habilitado. A medida que se creen las demás guías, se podrán activar sus botones para abrir cada archivo HTML correspondiente.
+          </p>
+        </div>
+
+        <div class="module-grid">
+          <article class="card module-card">
+            <div class="module-number">1</div>
+            <div class="module-body">
+              <span class="status">Disponible</span>
+              <div class="module-top">
+                <h3 class="module-title">Introducción a SIG y ArcMap 10.8</h3>
+                <span class="duration">⏰ 2 horas</span>
+              </div>
+              <ul class="topics">
+                <li>SIG y ArcMap</li>
+                <li>Tipos de datos</li>
+                <li>Organización del proyecto</li>
+              </ul>
+              <a class="btn btn-blue" href="modulo1.html">Ver guía</a>
+            </div>
+          </article>
+
+          <article class="card module-card">
+            <div class="module-number">2</div>
+            <div class="module-body">
+              <span class="status pending">Próximamente</span>
+              <div class="module-top">
+                <h3 class="module-title">Descarga de Datos Geográficos de Colombia</h3>
+                <span class="duration">⏰ 3 horas</span>
+              </div>
+              <ul class="topics">
+                <li>Fuentes oficiales Colombia</li>
+                <li>Landsat y Sentinel-2</li>
+                <li>DEM</li>
+              </ul>
+              <span class="btn btn-disabled" aria-disabled="true">Próximamente</span>
+            </div>
+          </article>
+
+          <article class="card module-card">
+            <div class="module-number">3</div>
+            <div class="module-body">
+              <span class="status pending">Próximamente</span>
+              <div class="module-top">
+                <h3 class="module-title">Sistemas de Coordenadas y Preparación de Datos</h3>
+                <span class="duration">⏰ 3 horas</span>
+              </div>
+              <ul class="topics">
+                <li>WGS84 y Magna-SIRGAS</li>
+                <li>Definir vs Proyectar</li>
+                <li>Área de estudio</li>
+              </ul>
+              <span class="btn btn-disabled" aria-disabled="true">Próximamente</span>
+            </div>
+          </article>
+
+          <article class="card module-card">
+            <div class="module-number">4</div>
+            <div class="module-body">
+              <span class="status pending">Próximamente</span>
+              <div class="module-top">
+                <h3 class="module-title">Manejo de Datos Vectoriales, Tablas y Edición</h3>
+                <span class="duration">⏰ 3 horas</span>
+              </div>
+              <ul class="topics">
+                <li>Simbología y etiquetas</li>
+                <li>Joins con Excel</li>
+                <li>Digitalización</li>
+              </ul>
+              <span class="btn btn-disabled" aria-disabled="true">Próximamente</span>
+            </div>
+          </article>
+
+          <article class="card module-card">
+            <div class="module-number">5</div>
+            <div class="module-body">
+              <span class="status pending">Próximamente</span>
+              <div class="module-top">
+                <h3 class="module-title">Geoprocesamiento y Análisis Espacial</h3>
+                <span class="duration">⏰ 3 horas</span>
+              </div>
+              <ul class="topics">
+                <li>Clip y Buffer</li>
+                <li>Intersect y Dissolve</li>
+                <li>Análisis de proximidad</li>
+              </ul>
+              <span class="btn btn-disabled" aria-disabled="true">Próximamente</span>
+            </div>
+          </article>
+
+          <article class="card module-card">
+            <div class="module-number">6</div>
+            <div class="module-body">
+              <span class="status pending">Próximamente</span>
+              <div class="module-top">
+                <h3 class="module-title">Manejo de Ráster, DEM y Análisis de Terreno</h3>
+                <span class="duration">⏰ 2 horas</span>
+              </div>
+              <ul class="topics">
+                <li>DEM y relieve</li>
+                <li>Hillshade y pendiente</li>
+                <li>Curvas de nivel</li>
+              </ul>
+              <span class="btn btn-disabled" aria-disabled="true">Próximamente</span>
+            </div>
+          </article>
+
+          <article class="card module-card">
+            <div class="module-number">7</div>
+            <div class="module-body">
+              <span class="status pending">Próximamente</span>
+              <div class="module-top">
+                <h3 class="module-title">Imágenes Satelitales, Bandas, Color y NDVI</h3>
+                <span class="duration">⏰ 3 horas</span>
+              </div>
+              <ul class="topics">
+                <li>Bandas satelitales</li>
+                <li>Composición RGB</li>
+                <li>Cálculo de NDVI</li>
+              </ul>
+              <span class="btn btn-disabled" aria-disabled="true">Próximamente</span>
+            </div>
+          </article>
+
+          <article class="card module-card">
+            <div class="module-number">8</div>
+            <div class="module-body">
+              <span class="status pending">Próximamente</span>
+              <div class="module-top">
+                <h3 class="module-title">Layout, Exportación y Proyecto Final</h3>
+                <span class="duration">⏰ 1 hora</span>
+              </div>
+              <ul class="topics">
+                <li>Layout View</li>
+                <li>Exportación PDF</li>
+                <li>Proyecto final</li>
+              </ul>
+              <span class="btn btn-disabled" aria-disabled="true">Próximamente</span>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="project" id="proyecto-final">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-kicker">🏁 Proyecto final</span>
+          <h2>Proyecto Final — Análisis Territorial de un Municipio Colombiano</h2>
+          <p class="section-description">
+            El proyecto integra cartografía base, análisis vectorial, procesamiento de DEM, composiciones satelitales y NDVI para construir una lectura territorial básica de un municipio colombiano.
+          </p>
+        </div>
+
+        <ul class="deliverables">
+          <li>📄 Mapa base municipal</li>
+          <li>📄 Mapa de vías, ríos y centros poblados</li>
+          <li>📄 Mapa de hillshade y curvas de nivel</li>
+          <li>📄 Mapa de pendiente</li>
+          <li>📄 Composición RGB color natural</li>
+          <li>📄 Composición RGB falso color infrarrojo</li>
+          <li>📄 Mapa de NDVI clasificado</li>
+          <li>📄 Informe escrito de interpretación</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="requirements" id="requisitos">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-kicker">🧰 Requisitos</span>
+          <h2>Lo necesario para iniciar</h2>
+          <p class="section-description">
+            El curso está pensado para principiantes, por eso el enfoque es práctico, progresivo y guiado paso a paso.
+          </p>
+        </div>
+
+        <div class="grid grid-3">
+          <article class="card requirement-card">
+            <div class="icon">🌱</div>
+            <h3>Sin experiencia previa</h3>
+            <p>No necesitas conocimientos anteriores en SIG ni en ArcMap para comenzar.</p>
+          </article>
+
+          <article class="card requirement-card">
+            <div class="icon">💻</div>
+            <h3>Equipo y software</h3>
+            <p>Computador con Windows 10 y ArcMap 10.8 instalado para realizar los ejercicios.</p>
+          </article>
+
+          <article class="card requirement-card">
+            <div class="icon">🧭</div>
+            <h3>Práctica constante</h3>
+            <p>Ganas de aprender y trabajar con datos reales del territorio colombiano.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div>
+        <strong>Curso desarrollado con datos reales de Colombia</strong>
+        <p>ArcMap 10.8 · SIG · Sensores remotos · NDVI · 2026</p>
+      </div>
+      <a class="top-link" href="#inicio">Volver arriba ↑</a>
+    </div>
+  </footer>
+</body>
+</html>
