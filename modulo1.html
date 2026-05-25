@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Módulo 1 | Introducción a SIG y ArcMap 10.8</title>
+  <meta name="description" content="Guía didáctica del Módulo 1 del curso ArcMap 10.8 desde Cero: introducción a SIG, tipos de datos, shapefile, MXD, organización de carpetas e interfaz de ArcMap." />
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+    :root {
+      --azul-oscuro:#1F4E79;
+      --azul-medio:#2E75B6;
+      --azul-claro:#D6E4F0;
+      --verde:#1E6B1E;
+      --verde-claro:#E8F5E9;
+      --naranja:#C55A11;
+      --naranja-claro:#FDE9D9;
+      --gris-claro:#F2F2F2;
+      --gris-borde:#E5E7EB;
+      --texto:#1F2937;
+      --muted:#5B6775;
+      --blanco:#FFFFFF;
+      --sombra:0 14px 35px rgba(31,78,121,.12);
+      --sombra-suave:0 8px 22px rgba(31,78,121,.08);
+      --radio:22px;
+    }
+
+    * { box-sizing:border-box; margin:0; padding:0; }
+
+    html { scroll-behavior:smooth; }
+
+    body {
+      font-family:"Inter", Arial, sans-serif;
+      background:linear-gradient(180deg,#ffffff 0%,#f7fafc 100%);
+      color:var(--texto);
+      line-height:1.65;
+    }
+
+    a { color:inherit; text-decoration:none; }
+
+    .container {
+      width:min(1120px, calc(100% - 32px));
+      margin:0 auto;
+    }
+
+    .topbar {
+      background:var(--azul-oscuro);
+      color:#fff;
+      padding:12px 0;
+      font-size:.92rem;
+    }
+
+    .topbar-inner {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      flex-wrap:wrap;
+    }
+
+    .topbar a {
+      font-weight:800;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:7px 11px;
+      border-radius:999px;
+      background:rgba(255,255,255,.12);
+      border:1px solid rgba(255,255,255,.16);
+    }
+
+    .hero {
+      position:relative;
+      color:white;
+      overflow:hidden;
+      padding:72px 0 58px;
+      background:
+        radial-gradient(circle at 12% 18%, rgba(255,255,255,.18), transparent 28%),
+        radial-gradient(circle at 86% 18%, rgba(214,228,240,.20), transparent 30%),
+        linear-gradient(135deg, var(--azul-oscuro) 0%, var(--azul-medio) 58%, #183C5C 100%);
+    }
+
+    .hero::after {
+      content:"";
+      position:absolute;
+      right:-120px;
+      bottom:-180px;
+      width:460px;
+      height:460px;
+      border-radius:50%;
+      background:rgba(255,255,255,.10);
+    }
+
+    .hero-content {
+      position:relative;
+      z-index:1;
+      max-width:920px;
+    }
+
+    .badge {
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 13px;
+      border-radius:999px;
+      background:rgba(255,255,255,.15);
+      border:1px solid rgba(255,255,255,.25);
+      font-weight:800;
+      margin-bottom:22px;
+    }
+
+    h1 {
+      font-size:clamp(2.15rem, 5vw, 4.6rem);
+      line-height:1;
+      letter-spacing:-.05em;
+      margin-bottom:20px;
+    }
+
+    .subtitle {
+      font-size:clamp(1.05rem, 2vw, 1.28rem);
+      color:rgba(255,255,255,.86);
+      max-width:780px;
+      margin-bottom:28px;
+    }
+
+    .hero-grid {
+      display:grid;
+      grid-template-columns:repeat(4, minmax(0,1fr));
+      gap:14px;
+      margin-top:28px;
+    }
+
+    .hero-stat {
+      padding:16px;
+      border-radius:18px;
+      background:rgba(255,255,255,.14);
+      border:1px solid rgba(255,255,255,.20);
+      backdrop-filter:blur(8px);
+    }
+
+    .hero-stat strong {
+      display:block;
+      font-size:1.15rem;
+      line-height:1.15;
+    }
+
+    .hero-stat span {
+      color:rgba(255,255,255,.80);
+      font-size:.9rem;
+    }
+
+    nav {
+      position:sticky;
+      top:0;
+      z-index:20;
+      background:rgba(255,255,255,.96);
+      border-bottom:1px solid var(--gris-borde);
+      box-shadow:0 8px 22px rgba(31,78,121,.07);
+      backdrop-filter:blur(10px);
+    }
+
+    .nav-inner {
+      display:flex;
+      gap:10px;
+      overflow-x:auto;
+      padding:10px 0;
+    }
+
+    nav a {
+      flex:0 0 auto;
+      color:var(--azul-oscuro);
+      background:#F3F7FB;
+      border:1px solid #E4EEF7;
+      padding:8px 12px;
+      border-radius:999px;
+      font-size:.9rem;
+      font-weight:800;
+      transition:all .2s ease;
+    }
+
+    nav a:hover {
+      background:var(--azul-claro);
+      transform:translateY(-1px);
+    }
+
+    section {
+      padding:66px 0;
+    }
+
+    .section-header {
+      max-width:830px;
+      margin-bottom:28px;
+    }
+
+    .kicker {
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      color:var(--azul-medio);
+      font-weight:900;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      font-size:.78rem;
+      margin-bottom:10px;
+    }
+
+    h2 {
+      color:var(--azul-oscuro);
+      font-size:clamp(1.65rem, 3vw, 2.55rem);
+      line-height:1.12;
+      letter-spacing:-.03em;
+      margin-bottom:12px;
+    }
+
+    h3 {
+      color:var(--azul-oscuro);
+      font-size:1.2rem;
+      line-height:1.25;
+      margin-bottom:8px;
+    }
+
+    .lead {
+      color:var(--muted);
+      font-size:1.05rem;
+    }
+
+    .grid {
+      display:grid;
+      gap:20px;
+    }
+
+    .grid-2 { grid-template-columns:repeat(2, minmax(0,1fr)); }
+    .grid-3 { grid-template-columns:repeat(3, minmax(0,1fr)); }
+    .grid-4 { grid-template-columns:repeat(4, minmax(0,1fr)); }
+
+    .card {
+      background:white;
+      border:1px solid rgba(31,78,121,.10);
+      border-radius:var(--radio);
+      padding:24px;
+      box-shadow:var(--sombra-suave);
+      transition:transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+    }
+
+    .card:hover {
+      transform:translateY(-4px);
+      box-shadow:var(--sombra);
+      border-color:rgba(46,117,182,.25);
+    }
+
+    .icon {
+      width:52px;
+      height:52px;
+      border-radius:16px;
+      display:grid;
+      place-items:center;
+      background:var(--azul-claro);
+      font-size:1.5rem;
+      margin-bottom:14px;
+    }
+
+    .card p,
+    .card li {
+      color:#4B5563;
+    }
+
+    .number-list {
+      counter-reset:item;
+      list-style:none;
+      display:grid;
+      gap:13px;
+    }
+
+    .number-list li {
+      counter-increment:item;
+      display:grid;
+      grid-template-columns:42px 1fr;
+      gap:12px;
+      align-items:start;
+      padding:14px;
+      border-radius:16px;
+      background:#F8FBFD;
+      border:1px solid #E6EEF6;
+    }
+
+    .number-list li::before {
+      content:counter(item);
+      width:36px;
+      height:36px;
+      border-radius:50%;
+      display:grid;
+      place-items:center;
+      color:white;
+      background:var(--azul-medio);
+      font-weight:900;
+    }
+
+    .tool-badges {
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+    }
+
+    .tool-badge {
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:10px 13px;
+      border-radius:999px;
+      background:#F3F7FB;
+      color:var(--azul-oscuro);
+      border:1px solid #DFEAF4;
+      font-weight:800;
+    }
+
+    .concept-map {
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:18px;
+      align-items:stretch;
+    }
+
+    .concept {
+      position:relative;
+      padding:24px;
+      border-radius:24px;
+      background:white;
+      border:1px solid var(--gris-borde);
+      box-shadow:var(--sombra-suave);
+    }
+
+    .concept.vector {
+      border-top:6px solid var(--azul-medio);
+    }
+
+    .concept.raster {
+      border-top:6px solid var(--verde);
+    }
+
+    .mini-list {
+      list-style:none;
+      display:grid;
+      gap:8px;
+      margin-top:14px;
+    }
+
+    .mini-list li {
+      display:flex;
+      gap:8px;
+      color:#4B5563;
+    }
+
+    .mini-list li::before {
+      content:"✓";
+      color:var(--verde);
+      font-weight:900;
+    }
+
+    .folder-box {
+      background:#0B2235;
+      color:#D7EFFF;
+      border-radius:20px;
+      padding:20px;
+      font-family:Consolas, "Courier New", monospace;
+      overflow-x:auto;
+      box-shadow:0 14px 26px rgba(11,34,53,.16);
+      font-size:.92rem;
+    }
+
+    .step-list {
+      counter-reset:step;
+      display:grid;
+      gap:18px;
+    }
+
+    .step {
+      counter-increment:step;
+      display:grid;
+      grid-template-columns:58px 1fr;
+      gap:16px;
+      background:white;
+      border:1px solid rgba(31,78,121,.10);
+      border-radius:22px;
+      padding:20px;
+      box-shadow:var(--sombra-suave);
+    }
+
+    .step::before {
+      content:counter(step);
+      width:46px;
+      height:46px;
+      border-radius:50%;
+      display:grid;
+      place-items:center;
+      background:linear-gradient(135deg,var(--azul-oscuro),var(--azul-medio));
+      color:white;
+      font-weight:900;
+      font-size:1.1rem;
+    }
+
+    .step strong {
+      display:block;
+      color:var(--azul-oscuro);
+      margin-bottom:4px;
+      font-size:1.04rem;
+    }
+
+    .callout {
+      border-radius:22px;
+      padding:24px;
+      border:1px solid;
+      margin-top:20px;
+    }
+
+    .callout.warning {
+      background:var(--naranja-claro);
+      border-color:#F2C39B;
+      border-left:7px solid var(--naranja);
+    }
+
+    .callout.success {
+      background:var(--verde-claro);
+      border-color:#B9E0BC;
+      border-left:7px solid var(--verde);
+    }
+
+    .callout.info {
+      background:var(--azul-claro);
+      border-color:#B9CCE0;
+      border-left:7px solid var(--azul-medio);
+    }
+
+    .error-grid {
+      display:grid;
+      gap:14px;
+      margin-top:18px;
+    }
+
+    .error-item {
+      display:grid;
+      grid-template-columns:34px 1fr;
+      gap:12px;
+      align-items:start;
+      padding:14px;
+      border-radius:16px;
+      background:rgba(255,255,255,.62);
+      border:1px solid rgba(197,90,17,.18);
+    }
+
+    .checklist {
+      list-style:none;
+      display:grid;
+      grid-template-columns:repeat(2, minmax(0,1fr));
+      gap:12px;
+      margin-top:20px;
+    }
+
+    .checklist li {
+      display:flex;
+      gap:10px;
+      padding:12px 14px;
+      border-radius:16px;
+      background:white;
+      border:1px solid #DDECDC;
+      color:#2F3A45;
+      font-weight:650;
+    }
+
+    .checklist li::before {
+      content:"✓";
+      flex:0 0 24px;
+      width:24px;
+      height:24px;
+      display:grid;
+      place-items:center;
+      border-radius:50%;
+      background:var(--verde);
+      color:white;
+      font-weight:900;
+      font-size:.82rem;
+    }
+
+    .exercise-box {
+      background:linear-gradient(135deg,#F8FBFD,#FFFFFF);
+      border:1px solid #E0EBF5;
+      border-radius:28px;
+      padding:28px;
+      box-shadow:var(--sombra);
+    }
+
+    .footer {
+      background:var(--azul-oscuro);
+      color:white;
+      padding:34px 0;
+      margin-top:40px;
+    }
+
+    .footer-inner {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:18px;
+      flex-wrap:wrap;
+    }
+
+    .footer p {
+      color:rgba(255,255,255,.78);
+    }
+
+    .footer a {
+      display:inline-flex;
+      padding:10px 14px;
+      border-radius:999px;
+      background:rgba(255,255,255,.12);
+      border:1px solid rgba(255,255,255,.18);
+      font-weight:800;
+    }
+
+    @media (max-width: 980px) {
+      .hero-grid,
+      .grid-4,
+      .grid-3 {
+        grid-template-columns:repeat(2, minmax(0,1fr));
+      }
+    }
+
+    @media (max-width: 760px) {
+      .hero {
+        padding:56px 0 42px;
+      }
+
+      .hero-grid,
+      .grid-2,
+      .grid-3,
+      .grid-4,
+      .concept-map,
+      .checklist {
+        grid-template-columns:1fr;
+      }
+
+      section {
+        padding:48px 0;
+      }
+
+      .step {
+        grid-template-columns:1fr;
+      }
+
+      .topbar-inner {
+        align-items:flex-start;
+      }
+    }
+
+    @media print {
+      nav, .topbar { display:none; }
+      .card, .step, .concept, .exercise-box { box-shadow:none; break-inside:avoid; }
+      section { padding:32px 0; }
+    }
+  </style>
+</head>
+
+<body id="inicio">
+  <div class="topbar">
+    <div class="container topbar-inner">
+      <span>ArcMap 10.8 desde Cero · Curso aplicado a Colombia</span>
+      <a href="index.html">← Volver a la portada</a>
+    </div>
+  </div>
+
+  <header class="hero">
+    <div class="container hero-content">
+      <div class="badge">🗺️ Módulo 1 · Duración: 2 horas</div>
+      <h1>Introducción a SIG y ArcMap 10.8</h1>
+      <p class="subtitle">
+        Primeros pasos para entender qué es un SIG, cómo funciona ArcMap 10.8, qué tipos de datos se usan y cómo organizar correctamente un proyecto cartográfico.
+      </p>
+
+      <div class="hero-grid">
+        <div class="hero-stat">
+          <strong>Nivel</strong>
+          <span>Principiante</span>
+        </div>
+        <div class="hero-stat">
+          <strong>Software</strong>
+          <span>ArcMap 10.8</span>
+        </div>
+        <div class="hero-stat">
+          <strong>Producto</strong>
+          <span>Primer MXD</span>
+        </div>
+        <div class="hero-stat">
+          <strong>Enfoque</strong>
+          <span>Datos de Colombia</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <nav aria-label="Navegación del módulo">
+    <div class="container nav-inner">
+      <a href="#objetivo">Objetivo</a>
+      <a href="#temas">Temas</a>
+      <a href="#herramientas">Herramientas</a>
+      <a href="#conceptos">Conceptos</a>
+      <a href="#carpetas">Carpetas</a>
+      <a href="#interfaz">Interfaz</a>
+      <a href="#paso-a-paso">Paso a paso</a>
+      <a href="#errores">Errores</a>
+      <a href="#resultado">Resultado</a>
+    </div>
+  </nav>
+
+  <main>
+    <section id="objetivo">
+      <div class="container grid grid-2">
+        <div>
+          <div class="section-header">
+            <span class="kicker">🎯 Objetivo del módulo</span>
+            <h2>Familiarizarse con el entorno SIG y preparar el primer proyecto</h2>
+            <p class="lead">
+              Al finalizar este módulo, el estudiante comprenderá los conceptos básicos de los Sistemas de Información Geográfica, reconocerá el entorno de ArcMap 10.8 y organizará una carpeta de trabajo lista para desarrollar el curso.
+            </p>
+          </div>
+
+          <div class="callout info">
+            <h3>Idea clave</h3>
+            <p>
+              Un SIG no solo sirve para hacer mapas bonitos. Sirve para ubicar, consultar, analizar y comunicar información del territorio.
+            </p>
+          </div>
+        </div>
+
+        <article class="card">
+          <div class="icon">📌</div>
+          <h3>Producto final del módulo</h3>
+          <p>
+            Una carpeta del curso organizada correctamente y un archivo de proyecto <strong>.mxd</strong> creado en ArcMap 10.8.
+          </p>
+          <ul class="mini-list">
+            <li>Carpetas sin tildes, ñ ni espacios.</li>
+            <li>Proyecto guardado en la ruta correcta.</li>
+            <li>Reconocimiento de Data View y Layout View.</li>
+            <li>Spatial Analyst verificado desde el inicio.</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section id="temas">
+      <div class="container">
+        <div class="section-header">
+          <span class="kicker">📚 Temas del módulo</span>
+          <h2>Lo que aprenderás hoy</h2>
+          <p class="lead">
+            Estos contenidos corresponden a los fundamentos necesarios para iniciar cualquier flujo de trabajo en ArcMap.
+          </p>
+        </div>
+
+        <ol class="number-list">
+          <li><span>Qué es un SIG y para qué sirve en el análisis del territorio colombiano.</span></li>
+          <li><span>Qué es ArcMap 10.8 y cuál es su papel dentro de ArcGIS Desktop.</span></li>
+          <li><span>Componentes básicos: ArcMap, ArcCatalog y ArcToolbox.</span></li>
+          <li><span>Diferencia entre datos vectoriales y datos ráster.</span></li>
+          <li><span>Qué es un shapefile y por qué sus archivos deben permanecer juntos.</span></li>
+          <li><span>Qué es una tabla de atributos y cómo se relaciona con el mapa.</span></li>
+          <li><span>Qué es un proyecto MXD y qué guarda realmente.</span></li>
+          <li><span>Organización de carpetas para evitar rutas rotas.</span></li>
+          <li><span>Reconocimiento de la interfaz: Table of Contents, Data View, Layout View, Add Data, ArcCatalog y ArcToolbox.</span></li>
+        </ol>
+      </div>
+    </section>
+
+    <section id="herramientas">
+      <div class="container">
+        <div class="section-header">
+          <span class="kicker">🧰 Herramientas de ArcMap</span>
+          <h2>Elementos que debes reconocer desde el primer día</h2>
+          <p class="lead">
+            No necesitas dominarlos todos de inmediato, pero sí reconocer para qué sirve cada uno dentro del flujo de trabajo.
+          </p>
+        </div>
+
+        <div class="tool-badges">
+          <span class="tool-badge">🧾 Table of Contents</span>
+          <span class="tool-badge">🗺️ Data View</span>
+          <span class="tool-badge">📄 Layout View</span>
+          <span class="tool-badge">➕ Add Data</span>
+          <span class="tool-badge">📁 ArcCatalog</span>
+          <span class="tool-badge">🧰 ArcToolbox</span>
+          <span class="tool-badge">🎨 Layer Properties</span>
+          <span class="tool-badge">🌿 Spatial Analyst</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="conceptos">
+      <div class="container">
+        <div class="section-header">
+          <span class="kicker">🧠 Conceptos fundamentales</span>
+          <h2>Antes de abrir ArcMap, entiende la lógica de los datos</h2>
+        </div>
+
+        <div class="grid grid-3">
+          <article class="card">
+            <div class="icon">🌎</div>
+            <h3>¿Qué es un SIG?</h3>
+            <p>
+              Un Sistema de Información Geográfica permite capturar, organizar, analizar y representar información con ubicación. Ayuda a responder preguntas como: ¿dónde está?, ¿qué hay cerca?, ¿qué relación existe entre elementos del territorio?
+            </p>
+          </article>
+
+          <article class="card">
+            <div class="icon">🖥️</div>
+            <h3>¿Qué es ArcMap 10.8?</h3>
+            <p>
+              ArcMap es el programa central de ArcGIS Desktop. Permite cargar capas, consultar tablas, editar información, analizar datos y diseñar mapas finales para impresión o exportación.
+            </p>
+          </article>
+
+          <article class="card">
+            <div class="icon">🇨🇴</div>
+            <h3>Ejemplos en Colombia</h3>
+            <p>
+              Puedes trabajar con municipios, vías, ríos, escuelas, zonas de riesgo, imágenes satelitales, modelos de elevación y datos estadísticos del DANE.
+            </p>
+          </article>
+        </div>
+
+        <div class="concept-map" style="margin-top:22px;">
+          <article class="concept vector">
+            <h3>📐 Datos vectoriales</h3>
+            <p>
+              Representan elementos con geometría precisa. Se usan para objetos delimitados o identificables.
+            </p>
+            <ul class="mini-list">
+              <li><strong>Puntos:</strong> escuelas, hospitales, estaciones.</li>
+              <li><strong>Líneas:</strong> vías, ríos, redes.</li>
+              <li><strong>Polígonos:</strong> municipios, predios, áreas de estudio.</li>
+            </ul>
+          </article>
+
+          <article class="concept raster">
+            <h3>🛰️ Datos ráster</h3>
+            <p>
+              Representan el territorio como una matriz de píxeles. Cada píxel tiene un valor numérico.
+            </p>
+            <ul class="mini-list">
+              <li>DEM o Modelo Digital de Elevación.</li>
+              <li>Imágenes Landsat y Sentinel-2.</li>
+              <li>NDVI, pendiente, temperatura o coberturas.</li>
+            </ul>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="formatos">
+      <div class="container grid grid-3">
+        <article class="card">
+          <div class="icon">📁</div>
+          <h3>Shapefile</h3>
+          <p>
+            Es un formato vectorial compuesto por varios archivos. Los más importantes son <strong>.shp</strong>, <strong>.dbf</strong>, <strong>.shx</strong> y <strong>.prj</strong>. Nunca deben separarse.
+          </p>
+        </article>
+
+        <article class="card">
+          <div class="icon">📊</div>
+          <h3>Tabla de atributos</h3>
+          <p>
+            Es la tabla que contiene la información descriptiva de cada elemento del mapa. Cada fila representa un objeto y cada columna un campo.
+          </p>
+        </article>
+
+        <article class="card">
+          <div class="icon">🗂️</div>
+          <h3>Proyecto MXD</h3>
+          <p>
+            El archivo <strong>.mxd</strong> guarda la organización del mapa, simbología y capas, pero no almacena los datos. Solo guarda referencias a sus ubicaciones.
+          </p>
+        </article>
+      </div>
+    </section>
+
+    <section id="carpetas">
+      <div class="container grid grid-2">
+        <div>
+          <div class="section-header">
+            <span class="kicker">🗂️ Organización del proyecto</span>
+            <h2>La carpeta bien organizada evita errores durante todo el curso</h2>
+            <p class="lead">
+              Antes de cargar datos en ArcMap, crea una estructura de carpetas clara. Esta práctica evita rutas rotas, pérdidas de archivos y confusiones al exportar resultados.
+            </p>
+          </div>
+
+          <div class="callout warning">
+            <h3>⚠️ Regla de oro</h3>
+            <p>
+              No uses tildes, ñ, espacios ni caracteres especiales en nombres de carpetas o archivos. Usa guion bajo bajo <strong>_</strong> y rutas cortas.
+            </p>
+          </div>
+        </div>
+
+        <div class="folder-box" aria-label="Estructura recomendada de carpetas">
+C:/SIG/Curso_ArcMap_108/
+├── 01_Vectorial
+├── 02_Raster
+├── 03_DEM
+├── 04_Imagenes_Satelitales
+├── 05_Resultados
+├── 06_Mapas_PDF
+├── 07_Proyecto_MXD
+└── 08_Tablas
+        </div>
+      </div>
+    </section>
+
+    <section id="interfaz">
+      <div class="container">
+        <div class="section-header">
+          <span class="kicker">🖱️ Interfaz básica</span>
+          <h2>Recorrido inicial por ArcMap 10.8</h2>
+          <p class="lead">
+            Estos son los espacios y botones que más usarás durante el curso.
+          </p>
+        </div>
+
+        <div class="grid grid-3">
+          <article class="card">
+            <div class="icon">📚</div>
+            <h3>Table of Contents</h3>
+            <p>Panel izquierdo donde se organizan, activan y ordenan las capas del mapa.</p>
+          </article>
+
+          <article class="card">
+            <div class="icon">🗺️</div>
+            <h3>Data View</h3>
+            <p>Vista de trabajo para explorar, editar y analizar capas geográficas.</p>
+          </article>
+
+          <article class="card">
+            <div class="icon">📄</div>
+            <h3>Layout View</h3>
+            <p>Vista para diseñar el mapa final con título, leyenda, escala, norte y fuentes.</p>
+          </article>
+
+          <article class="card">
+            <div class="icon">➕</div>
+            <h3>Add Data</h3>
+            <p>Botón para cargar shapefiles, geodatabases, tablas, DEM e imágenes satelitales.</p>
+          </article>
+
+          <article class="card">
+            <div class="icon">📁</div>
+            <h3>ArcCatalog</h3>
+            <p>Explorador de archivos geográficos. Permite conectar carpetas y revisar datos.</p>
+          </article>
+
+          <article class="card">
+            <div class="icon">🧰</div>
+            <h3>ArcToolbox</h3>
+            <p>Caja de herramientas para geoprocesamiento, análisis espacial, ráster y conversión.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="paso-a-paso">
+      <div class="container">
+        <div class="exercise-box">
+          <div class="section-header">
+            <span class="kicker">🧪 Ejercicio práctico</span>
+            <h2>Crear el primer proyecto en ArcMap 10.8</h2>
+            <p class="lead">
+              Sigue estos pasos en orden para configurar correctamente tu entorno de trabajo.
+            </p>
+          </div>
+
+          <div class="step-list">
+            <div class="step">
+              <div>
+                <strong>Crear la carpeta del curso</strong>
+                <p>Crea la carpeta <strong>C:/SIG/Curso_ArcMap_108/</strong> y dentro agrega las subcarpetas recomendadas.</p>
+              </div>
+            </div>
+
+            <div class="step">
+              <div>
+                <strong>Abrir ArcMap</strong>
+                <p>Inicia ArcMap 10.8 y selecciona la opción para crear un mapa en blanco.</p>
+              </div>
+            </div>
+
+            <div class="step">
+              <div>
+                <strong>Conectar la carpeta en ArcCatalog</strong>
+                <p>Abre ArcCatalog, usa <strong>Connect Folder</strong> y conecta la carpeta principal del curso.</p>
+              </div>
+            </div>
+
+            <div class="step">
+              <div>
+                <strong>Guardar el proyecto MXD</strong>
+                <p>Guarda el proyecto como <strong>Curso_ArcMap_108.mxd</strong> dentro de la carpeta <strong>07_Proyecto_MXD</strong>.</p>
+              </div>
+            </div>
+
+            <div class="step">
+              <div>
+                <strong>Explorar las vistas de trabajo</strong>
+                <p>Alterna entre <strong>Data View</strong> y <strong>Layout View</strong> para reconocer la diferencia entre análisis y diseño final.</p>
+              </div>
+            </div>
+
+            <div class="step">
+              <div>
+                <strong>Activar Spatial Analyst</strong>
+                <p>Ve a <strong>Customize → Extensions</strong> y verifica que <strong>Spatial Analyst</strong> esté activada.</p>
+              </div>
+            </div>
+
+            <div class="step">
+              <div>
+                <strong>Guardar nuevamente</strong>
+                <p>Guarda el proyecto otra vez para conservar la conexión de carpetas y la configuración inicial.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="callout success">
+            <h3>🎯 Producto del ejercicio</h3>
+            <p>
+              Al terminar, debes tener una carpeta organizada con subcarpetas y un primer archivo <strong>.mxd</strong> guardado correctamente.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="errores">
+      <div class="container">
+        <div class="callout warning">
+          <span class="kicker">⚠️ Errores comunes</span>
+          <h2>Evita estos problemas desde el primer módulo</h2>
+
+          <div class="error-grid">
+            <div class="error-item">
+              <span>⚠️</span>
+              <div>
+                <strong>Guardar el MXD en el escritorio.</strong>
+                <p>Solución: guarda siempre dentro de la carpeta del proyecto, en <strong>07_Proyecto_MXD</strong>.</p>
+              </div>
+            </div>
+
+            <div class="error-item">
+              <span>⚠️</span>
+              <div>
+                <strong>Usar tildes, ñ o espacios.</strong>
+                <p>Solución: usa nombres cortos, sin caracteres especiales y con guion bajo.</p>
+              </div>
+            </div>
+
+            <div class="error-item">
+              <span>⚠️</span>
+              <div>
+                <strong>Separar los archivos del shapefile.</strong>
+                <p>Solución: mantén juntos los archivos .shp, .dbf, .shx y .prj.</p>
+              </div>
+            </div>
+
+            <div class="error-item">
+              <span>⚠️</span>
+              <div>
+                <strong>Mover datos después de crear el MXD.</strong>
+                <p>Solución: no cambies las carpetas de ubicación después de cargar capas al proyecto.</p>
+              </div>
+            </div>
+
+            <div class="error-item">
+              <span>⚠️</span>
+              <div>
+                <strong>Confundir ArcMap con ArcGIS Pro.</strong>
+                <p>Solución: recuerda que este curso está enfocado en ArcMap 10.8 de ArcGIS Desktop.</p>
+              </div>
+            </div>
+
+            <div class="error-item">
+              <span>⚠️</span>
+              <div>
+                <strong>No activar Spatial Analyst.</strong>
+                <p>Solución: verifica la extensión desde <strong>Customize → Extensions</strong> antes de trabajar con ráster, DEM o NDVI.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="resultado">
+      <div class="container">
+        <div class="callout success">
+          <span class="kicker">✅ Resultado esperado</span>
+          <h2>Al finalizar el Módulo 1 ya puedes iniciar un proyecto SIG ordenado</h2>
+          <p>
+            El estudiante debe comprender qué es un SIG, reconocer las funciones básicas de ArcMap, diferenciar datos vectoriales y ráster, entender la estructura de un shapefile y crear una carpeta de trabajo organizada.
+          </p>
+
+          <ul class="checklist">
+            <li>Explica qué es un SIG con ejemplos del territorio colombiano.</li>
+            <li>Reconoce ArcMap, ArcCatalog y ArcToolbox.</li>
+            <li>Diferencia datos vectoriales y ráster.</li>
+            <li>Identifica shapefile, tabla de atributos y MXD.</li>
+            <li>Crea la estructura de carpetas del curso.</li>
+            <li>Guarda correctamente el primer proyecto .mxd.</li>
+            <li>Reconoce Data View y Layout View.</li>
+            <li>Verifica Spatial Analyst desde el inicio.</li>
+          </ul>
+        </div>
+
+        <div class="callout info">
+          <h3>🚀 Próximo módulo</h3>
+          <p>
+            En el Módulo 2 aprenderás a descargar datos geográficos reales de Colombia: límites administrativos, vías, ríos, centros poblados, DEM e imágenes satelitales.
+          </p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div>
+        <strong>Módulo 1 — Introducción a SIG y ArcMap 10.8</strong>
+        <p>Curso ArcMap 10.8 desde Cero · Colombia · 2026</p>
+      </div>
+      <a href="#inicio">Volver arriba ↑</a>
+    </div>
+  </footer>
+</body>
+</html>
