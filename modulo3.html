@@ -1,1120 +1,492 @@
 <!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Módulo 3 | Sistemas de Coordenadas y Preparación de Datos</title>
-  <meta name="description" content="Guía didáctica del Módulo 3 del curso ArcMap 10.8: sistemas de coordenadas, WGS84, MAGNA-SIRGAS, Origen Nacional CTM12, Define Projection, Project y preparación de capas." />
-
-  <style>
+<html lang="es"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Módulo 3 | Sistemas de Coordenadas y Preparación de Datos</title>
+<meta name="description" content="Clase web del Módulo 3 del curso ArcMap 10.8 desde cero.">
+<style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-
-    :root {
-      --azul-oscuro:#1F4E79;
-      --azul-medio:#2E75B6;
-      --azul-claro:#D6E4F0;
-      --verde:#1E6B1E;
-      --verde-claro:#E8F5E9;
-      --naranja:#C55A11;
-      --naranja-claro:#FDE9D9;
-      --gris-claro:#F2F2F2;
-      --gris-borde:#E5E7EB;
-      --texto:#1F2937;
-      --muted:#5B6775;
-      --blanco:#FFFFFF;
-      --sombra:0 14px 35px rgba(31,78,121,.12);
-      --sombra-suave:0 8px 22px rgba(31,78,121,.08);
-      --radio:22px;
+    :root{
+      --blue-dark:#1F4E79; --blue:#2E75B6; --blue-soft:#D6E4F0;
+      --green:#1E6B1E; --green-soft:#E8F5E9;
+      --orange:#C55A11; --orange-soft:#FDE9D9;
+      --text:#1F2937; --muted:#5B6775; --line:#E5E7EB; --bg:#F7FAFC; --white:#fff;
+      --shadow:0 14px 35px rgba(31,78,121,.12); --shadow2:0 8px 22px rgba(31,78,121,.08);
+      --radius:22px;
     }
-
-    * { box-sizing:border-box; margin:0; padding:0; }
-    html { scroll-behavior:smooth; }
-
-    body {
-      font-family:"Inter", Arial, sans-serif;
-      background:linear-gradient(180deg,#ffffff 0%,#f7fafc 100%);
-      color:var(--texto);
-      line-height:1.65;
+    *{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{font-family:'Inter',Arial,sans-serif;background:linear-gradient(180deg,#fff 0%,#f7fafc 100%);color:var(--text);line-height:1.65}
+    a{text-decoration:none;color:inherit}
+    .container{width:min(1140px,calc(100% - 32px));margin:0 auto}
+    .topbar{background:var(--blue-dark);color:#fff;padding:12px 0;font-size:.92rem}
+    .topbar-inner{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+    .topbar a{font-weight:800;padding:7px 12px;border-radius:999px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.16)}
+    .hero{position:relative;overflow:hidden;color:#fff;padding:78px 0 62px;background:
+      radial-gradient(circle at 12% 18%, rgba(255,255,255,.18), transparent 28%),
+      radial-gradient(circle at 88% 20%, rgba(214,228,240,.18), transparent 30%),
+      linear-gradient(135deg,#1F4E79 0%,#2E75B6 58%,#183C5C 100%)}
+    .hero::after{content:"";position:absolute;right:-130px;bottom:-190px;width:480px;height:480px;border-radius:50%;background:rgba(255,255,255,.09)}
+    .hero-content{position:relative;z-index:1;max-width:950px}
+    .badge{display:inline-flex;align-items:center;gap:8px;padding:8px 13px;border-radius:999px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);font-weight:800;margin-bottom:22px}
+    h1{font-size:clamp(2.25rem,5vw,4.7rem);line-height:1;letter-spacing:-.05em;margin-bottom:18px}
+    .subtitle{font-size:clamp(1.05rem,2vw,1.28rem);color:rgba(255,255,255,.88);max-width:840px;margin-bottom:26px}
+    .hero-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:26px}
+    .hero-stat{padding:16px;border-radius:18px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.18);backdrop-filter:blur(8px)}
+    .hero-stat strong{display:block;font-size:1.12rem;line-height:1.15}
+    .hero-stat span{font-size:.9rem;color:rgba(255,255,255,.82)}
+    nav{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.96);border-bottom:1px solid var(--line);box-shadow:0 8px 22px rgba(31,78,121,.07);backdrop-filter:blur(10px)}
+    .nav-inner{display:flex;gap:10px;overflow-x:auto;padding:10px 0}
+    nav a{flex:0 0 auto;background:#F3F7FB;border:1px solid #E4EEF7;color:var(--blue-dark);padding:8px 12px;border-radius:999px;font-size:.9rem;font-weight:800;transition:.2s}
+    nav a:hover{background:var(--blue-soft);transform:translateY(-1px)}
+    section{padding:68px 0}
+    .section-header{max-width:860px;margin-bottom:28px}
+    .kicker{display:inline-flex;align-items:center;gap:8px;color:var(--blue);font-weight:900;letter-spacing:.08em;text-transform:uppercase;font-size:.78rem;margin-bottom:10px}
+    h2{color:var(--blue-dark);font-size:clamp(1.75rem,3vw,2.65rem);line-height:1.12;letter-spacing:-.03em;margin-bottom:12px}
+    h3{color:var(--blue-dark);font-size:1.18rem;line-height:1.25;margin-bottom:8px}
+    .lead{color:var(--muted);font-size:1.04rem}
+    .grid{display:grid;gap:20px}
+    .grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .grid-4{grid-template-columns:repeat(4,minmax(0,1fr))}
+    .card{background:#fff;border:1px solid rgba(31,78,121,.1);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow2);transition:.2s}
+    .card:hover{transform:translateY(-4px);box-shadow:var(--shadow);border-color:rgba(46,117,182,.25)}
+    .icon{width:52px;height:52px;border-radius:16px;display:grid;place-items:center;background:var(--blue-soft);font-size:1.5rem;margin-bottom:14px}
+    .card p,.card li{color:#4B5563}
+    .tool-badges{display:flex;flex-wrap:wrap;gap:10px}
+    .tool-badge{display:inline-flex;align-items:center;gap:8px;padding:10px 13px;border-radius:999px;background:#F3F7FB;color:var(--blue-dark);border:1px solid #DFEAF4;font-weight:800}
+    .route{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}
+    .route-step{position:relative;background:#fff;border:1px solid rgba(31,78,121,.1);border-radius:24px;padding:22px;box-shadow:var(--shadow2)}
+    .route-step .num{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,var(--blue-dark),var(--blue));color:#fff;font-weight:900;margin-bottom:14px}
+    .route-step p{color:#4B5563;font-size:.97rem}
+    .route-step::after{content:"→";position:absolute;right:-14px;top:38px;width:28px;height:28px;display:grid;place-items:center;background:#fff;color:var(--blue);font-weight:900;border-radius:50%;box-shadow:var(--shadow2)}
+    .route-step:last-child::after{display:none}
+    .number-list{counter-reset:item;list-style:none;display:grid;gap:13px}
+    .number-list li{counter-increment:item;display:grid;grid-template-columns:42px 1fr;gap:12px;align-items:start;padding:14px;border-radius:16px;background:#F8FBFD;border:1px solid #E6EEF6}
+    .number-list li::before{content:counter(item);width:36px;height:36px;border-radius:50%;display:grid;place-items:center;color:#fff;background:var(--blue);font-weight:900}
+    .mini-list{list-style:none;display:grid;gap:8px;margin-top:14px}
+    .mini-list li{display:flex;gap:8px;color:#4B5563}
+    .mini-list li::before{content:"✓";color:var(--green);font-weight:900}
+    .callout{border-radius:22px;padding:24px;border:1px solid;margin-top:20px}
+    .callout.info{background:var(--blue-soft);border-color:#B9CCE0;border-left:7px solid var(--blue)}
+    .callout.warning{background:var(--orange-soft);border-color:#F2C39B;border-left:7px solid var(--orange)}
+    .callout.success{background:var(--green-soft);border-color:#B9E0BC;border-left:7px solid var(--green)}
+    .compare{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+    .compare-card{border-radius:22px;background:#fff;border:1px solid rgba(31,78,121,.1);padding:22px;box-shadow:var(--shadow2);border-top:7px solid var(--blue)}
+    .compare-card.green{border-top-color:var(--green)}
+    .concept-visual{background:#fff;border-radius:24px;border:1px solid rgba(31,78,121,.1);padding:20px;box-shadow:var(--shadow2)}
+    .concept-visual svg{width:100%;height:auto;display:block}
+    .caption{margin-top:10px;color:#5B6775;font-style:italic;font-size:.92rem}
+    .formula{background:#0B2235;color:#D7EFFF;border-radius:18px;padding:18px;font-family:Consolas,'Courier New',monospace;overflow:auto;margin-top:14px}
+    .folder-box{background:#0B2235;color:#D7EFFF;border-radius:20px;padding:20px;font-family:Consolas,'Courier New',monospace;overflow:auto;box-shadow:0 14px 26px rgba(11,34,53,.16);font-size:.92rem}
+    .step-list{counter-reset:step;display:grid;gap:18px}
+    .step{counter-increment:step;display:grid;grid-template-columns:58px 1fr;gap:16px;background:#fff;border:1px solid rgba(31,78,121,.1);border-radius:22px;padding:20px;box-shadow:var(--shadow2)}
+    .step::before{content:counter(step);width:46px;height:46px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,var(--blue-dark),var(--blue));color:#fff;font-weight:900;font-size:1.1rem}
+    .step strong{display:block;color:var(--blue-dark);margin-bottom:4px;font-size:1.04rem}
+    .capture-gallery{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;margin-top:24px}
+    .capture-card{overflow:hidden;background:#fff;border:1px solid rgba(31,78,121,.12);border-radius:22px;box-shadow:var(--shadow2);transition:.2s}
+    .capture-card:hover{transform:translateY(-4px);box-shadow:var(--shadow);border-color:rgba(46,117,182,.28)}
+    .capture-card.wide{grid-column:1/-1}
+    .capture-img-wrap{background:#f5f7fa;border-bottom:1px solid var(--line);max-height:520px;overflow:auto}
+    .capture-card img{display:block;width:100%;height:auto}
+    .capture-body{padding:16px 18px 18px}
+    .capture-body p{color:#4B5563;font-size:.95rem;font-style:italic}
+    .checklist{list-style:none;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:20px}
+    .checklist li{display:flex;gap:10px;padding:12px 14px;border-radius:16px;background:#fff;border:1px solid #DDECDC;color:#2F3A45;font-weight:650}
+    .checklist li::before{content:"✓";flex:0 0 24px;width:24px;height:24px;display:grid;place-items:center;border-radius:50%;background:var(--green);color:#fff;font-weight:900;font-size:.82rem}
+    .error-grid{display:grid;gap:14px;margin-top:18px}
+    .error-item{display:grid;grid-template-columns:34px 1fr;gap:12px;align-items:start;padding:14px;border-radius:16px;background:rgba(255,255,255,.62);border:1px solid rgba(197,90,17,.18)}
+    .summary-points{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+    .summary-box{background:#fff;border:1px solid rgba(31,78,121,.1);border-radius:22px;padding:22px;box-shadow:var(--shadow2)}
+    .footer{background:var(--blue-dark);color:#fff;padding:34px 0;margin-top:40px}
+    .footer-inner{display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap}
+    .footer p{color:rgba(255,255,255,.78)}
+    .footer a{display:inline-flex;padding:10px 14px;border-radius:999px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);font-weight:800}
+    @media (max-width:980px){
+      .hero-grid,.grid-4,.grid-3,.route,.summary-points{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .route-step:nth-child(2)::after{display:none}
     }
-
-    a { color:inherit; text-decoration:none; }
-
-    .container {
-      width:min(1120px, calc(100% - 32px));
-      margin:0 auto;
+    @media (max-width:760px){
+      .hero{padding:56px 0 44px}
+      .hero-grid,.grid-2,.grid-3,.grid-4,.compare,.checklist,.capture-gallery,.route,.summary-points{grid-template-columns:1fr}
+      .route-step::after,.capture-card.wide{display:none;grid-column:auto}
+      .step{grid-template-columns:1fr}
+      section{padding:50px 0}
     }
-
-    .topbar {
-      background:var(--azul-oscuro);
-      color:#fff;
-      padding:12px 0;
-      font-size:.92rem;
+    @media print{
+      nav,.topbar{display:none}
+      .card,.step,.concept-visual,.compare-card,.capture-card,.route-step,.summary-box{box-shadow:none;break-inside:avoid}
+      section{padding:32px 0}
     }
-
-    .topbar-inner {
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:16px;
-      flex-wrap:wrap;
-    }
-
-    .topbar a {
-      font-weight:800;
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding:7px 11px;
-      border-radius:999px;
-      background:rgba(255,255,255,.12);
-      border:1px solid rgba(255,255,255,.16);
-    }
-
-    .hero {
-      position:relative;
-      color:white;
-      overflow:hidden;
-      padding:72px 0 58px;
-      background:
-        radial-gradient(circle at 12% 18%, rgba(255,255,255,.18), transparent 28%),
-        radial-gradient(circle at 86% 18%, rgba(214,228,240,.20), transparent 30%),
-        linear-gradient(135deg, var(--azul-oscuro) 0%, var(--azul-medio) 58%, #183C5C 100%);
-    }
-
-    .hero::after {
-      content:"";
-      position:absolute;
-      right:-120px;
-      bottom:-180px;
-      width:460px;
-      height:460px;
-      border-radius:50%;
-      background:rgba(255,255,255,.10);
-    }
-
-    .hero-content { position:relative; z-index:1; max-width:940px; }
-
-    .badge {
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding:8px 13px;
-      border-radius:999px;
-      background:rgba(255,255,255,.15);
-      border:1px solid rgba(255,255,255,.25);
-      font-weight:800;
-      margin-bottom:22px;
-    }
-
-    h1 {
-      font-size:clamp(2.15rem, 5vw, 4.6rem);
-      line-height:1;
-      letter-spacing:-.05em;
-      margin-bottom:20px;
-    }
-
-    .subtitle {
-      font-size:clamp(1.05rem, 2vw, 1.28rem);
-      color:rgba(255,255,255,.86);
-      max-width:840px;
-      margin-bottom:28px;
-    }
-
-    .hero-grid {
-      display:grid;
-      grid-template-columns:repeat(4, minmax(0,1fr));
-      gap:14px;
-      margin-top:28px;
-    }
-
-    .hero-stat {
-      padding:16px;
-      border-radius:18px;
-      background:rgba(255,255,255,.14);
-      border:1px solid rgba(255,255,255,.20);
-      backdrop-filter:blur(8px);
-    }
-
-    .hero-stat strong { display:block; font-size:1.15rem; line-height:1.15; }
-    .hero-stat span { color:rgba(255,255,255,.80); font-size:.9rem; }
-
-    nav {
-      position:sticky;
-      top:0;
-      z-index:20;
-      background:rgba(255,255,255,.96);
-      border-bottom:1px solid var(--gris-borde);
-      box-shadow:0 8px 22px rgba(31,78,121,.07);
-      backdrop-filter:blur(10px);
-    }
-
-    .nav-inner {
-      display:flex;
-      gap:10px;
-      overflow-x:auto;
-      padding:10px 0;
-    }
-
-    nav a {
-      flex:0 0 auto;
-      color:var(--azul-oscuro);
-      background:#F3F7FB;
-      border:1px solid #E4EEF7;
-      padding:8px 12px;
-      border-radius:999px;
-      font-size:.9rem;
-      font-weight:800;
-      transition:all .2s ease;
-    }
-
-    nav a:hover { background:var(--azul-claro); transform:translateY(-1px); }
-
-    section { padding:66px 0; }
-
-    .section-header { max-width:860px; margin-bottom:28px; }
-
-    .kicker {
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      color:var(--azul-medio);
-      font-weight:900;
-      letter-spacing:.08em;
-      text-transform:uppercase;
-      font-size:.78rem;
-      margin-bottom:10px;
-    }
-
-    h2 {
-      color:var(--azul-oscuro);
-      font-size:clamp(1.65rem, 3vw, 2.55rem);
-      line-height:1.12;
-      letter-spacing:-.03em;
-      margin-bottom:12px;
-    }
-
-    h3 {
-      color:var(--azul-oscuro);
-      font-size:1.18rem;
-      line-height:1.25;
-      margin-bottom:8px;
-    }
-
-    .lead { color:var(--muted); font-size:1.05rem; }
-
-    .grid { display:grid; gap:20px; }
-    .grid-2 { grid-template-columns:repeat(2, minmax(0,1fr)); }
-    .grid-3 { grid-template-columns:repeat(3, minmax(0,1fr)); }
-    .grid-4 { grid-template-columns:repeat(4, minmax(0,1fr)); }
-
-    .card {
-      background:white;
-      border:1px solid rgba(31,78,121,.10);
-      border-radius:var(--radio);
-      padding:24px;
-      box-shadow:var(--sombra-suave);
-      transition:transform .2s ease, box-shadow .2s ease, border-color .2s ease;
-    }
-
-    .card:hover {
-      transform:translateY(-4px);
-      box-shadow:var(--sombra);
-      border-color:rgba(46,117,182,.25);
-    }
-
-    .icon {
-      width:52px;
-      height:52px;
-      border-radius:16px;
-      display:grid;
-      place-items:center;
-      background:var(--azul-claro);
-      font-size:1.5rem;
-      margin-bottom:14px;
-    }
-
-    .card p, .card li { color:#4B5563; }
-
-    .tool-badges { display:flex; flex-wrap:wrap; gap:10px; }
-
-    .tool-badge {
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding:10px 13px;
-      border-radius:999px;
-      background:#F3F7FB;
-      color:var(--azul-oscuro);
-      border:1px solid #DFEAF4;
-      font-weight:800;
-    }
-
-    .number-list {
-      counter-reset:item;
-      list-style:none;
-      display:grid;
-      gap:13px;
-    }
-
-    .number-list li {
-      counter-increment:item;
-      display:grid;
-      grid-template-columns:42px 1fr;
-      gap:12px;
-      align-items:start;
-      padding:14px;
-      border-radius:16px;
-      background:#F8FBFD;
-      border:1px solid #E6EEF6;
-    }
-
-    .number-list li::before {
-      content:counter(item);
-      width:36px;
-      height:36px;
-      border-radius:50%;
-      display:grid;
-      place-items:center;
-      color:white;
-      background:var(--azul-medio);
-      font-weight:900;
-    }
-
-    .callout {
-      border-radius:22px;
-      padding:24px;
-      border:1px solid;
-      margin-top:20px;
-    }
-
-    .callout.warning {
-      background:var(--naranja-claro);
-      border-color:#F2C39B;
-      border-left:7px solid var(--naranja);
-    }
-
-    .callout.success {
-      background:var(--verde-claro);
-      border-color:#B9E0BC;
-      border-left:7px solid var(--verde);
-    }
-
-    .callout.info {
-      background:var(--azul-claro);
-      border-color:#B9CCE0;
-      border-left:7px solid var(--azul-medio);
-    }
-
-    .concept-visual {
-      background:#fff;
-      border-radius:24px;
-      border:1px solid rgba(31,78,121,.10);
-      padding:20px;
-      box-shadow:var(--sombra-suave);
-    }
-
-    .concept-visual svg {
-      width:100%;
-      height:auto;
-      display:block;
-    }
-
-    .caption {
-      margin-top:10px;
-      color:#5B6775;
-      font-style:italic;
-      font-size:.92rem;
-    }
-
-    .compare {
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:18px;
-      margin-top:20px;
-    }
-
-    .compare-card {
-      border-radius:22px;
-      background:#fff;
-      border:1px solid rgba(31,78,121,.10);
-      padding:22px;
-      box-shadow:var(--sombra-suave);
-      border-top:7px solid var(--azul-medio);
-    }
-
-    .compare-card.green { border-top-color:var(--verde); }
-
-    .mini-list {
-      list-style:none;
-      display:grid;
-      gap:9px;
-      margin-top:14px;
-    }
-
-    .mini-list li {
-      display:flex;
-      gap:8px;
-      color:#4B5563;
-    }
-
-    .mini-list li::before {
-      content:"✓";
-      color:var(--verde);
-      font-weight:900;
-    }
-
-    .table-wrap {
-      overflow:auto;
-      border-radius:20px;
-      border:1px solid var(--gris-borde);
-      box-shadow:var(--sombra-suave);
-      background:#fff;
-    }
-
-    table {
-      width:100%;
-      border-collapse:collapse;
-      min-width:760px;
-      background:#fff;
-    }
-
-    th, td {
-      text-align:left;
-      vertical-align:top;
-      padding:14px 16px;
-      border-bottom:1px solid var(--gris-borde);
-    }
-
-    th {
-      background:var(--azul-oscuro);
-      color:#fff;
-      font-weight:800;
-    }
-
-    tr:last-child td { border-bottom:none; }
-
-    .step-list {
-      counter-reset:step;
-      display:grid;
-      gap:18px;
-    }
-
-    .step {
-      counter-increment:step;
-      display:grid;
-      grid-template-columns:58px 1fr;
-      gap:16px;
-      background:white;
-      border:1px solid rgba(31,78,121,.10);
-      border-radius:22px;
-      padding:20px;
-      box-shadow:var(--sombra-suave);
-    }
-
-    .step::before {
-      content:counter(step);
-      width:46px;
-      height:46px;
-      border-radius:50%;
-      display:grid;
-      place-items:center;
-      background:linear-gradient(135deg,var(--azul-oscuro),var(--azul-medio));
-      color:white;
-      font-weight:900;
-      font-size:1.1rem;
-    }
-
-    .step strong {
-      display:block;
-      color:var(--azul-oscuro);
-      margin-bottom:4px;
-      font-size:1.04rem;
-    }
-
-    .formula {
-      background:#0B2235;
-      color:#D7EFFF;
-      border-radius:18px;
-      padding:18px;
-      font-family:Consolas, "Courier New", monospace;
-      overflow:auto;
-      margin-top:14px;
-    }
-
-    .error-grid {
-      display:grid;
-      gap:14px;
-      margin-top:18px;
-    }
-
-    .error-item {
-      display:grid;
-      grid-template-columns:34px 1fr;
-      gap:12px;
-      align-items:start;
-      padding:14px;
-      border-radius:16px;
-      background:rgba(255,255,255,.62);
-      border:1px solid rgba(197,90,17,.18);
-    }
-
-    .checklist {
-      list-style:none;
-      display:grid;
-      grid-template-columns:repeat(2, minmax(0,1fr));
-      gap:12px;
-      margin-top:20px;
-    }
-
-    .checklist li {
-      display:flex;
-      gap:10px;
-      padding:12px 14px;
-      border-radius:16px;
-      background:white;
-      border:1px solid #DDECDC;
-      color:#2F3A45;
-      font-weight:650;
-    }
-
-    .checklist li::before {
-      content:"✓";
-      flex:0 0 24px;
-      width:24px;
-      height:24px;
-      display:grid;
-      place-items:center;
-      border-radius:50%;
-      background:var(--verde);
-      color:white;
-      font-weight:900;
-      font-size:.82rem;
-    }
-
-    .footer {
-      background:var(--azul-oscuro);
-      color:white;
-      padding:34px 0;
-      margin-top:40px;
-    }
-
-    .footer-inner {
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:18px;
-      flex-wrap:wrap;
-    }
-
-    .footer p { color:rgba(255,255,255,.78); }
-
-    .footer a {
-      display:inline-flex;
-      padding:10px 14px;
-      border-radius:999px;
-      background:rgba(255,255,255,.12);
-      border:1px solid rgba(255,255,255,.18);
-      font-weight:800;
-    }
-
-    @media (max-width: 980px) {
-      .hero-grid, .grid-4, .grid-3 {
-        grid-template-columns:repeat(2, minmax(0,1fr));
-      }
-    }
-
-    @media (max-width: 760px) {
-      .hero { padding:56px 0 42px; }
-
-      .hero-grid, .grid-2, .grid-3, .grid-4, .checklist, .compare {
-        grid-template-columns:1fr;
-      }
-
-      section { padding:48px 0; }
-      .step { grid-template-columns:1fr; }
-    }
-
-    @media print {
-      nav, .topbar { display:none; }
-      .card, .step, .concept-visual, .compare-card { box-shadow:none; break-inside:avoid; }
-      section { padding:32px 0; }
-    }
-  </style>
-</head>
-
-<body id="inicio">
-  <div class="topbar">
-    <div class="container topbar-inner">
-      <span>ArcMap 10.8 desde Cero · Curso aplicado a Colombia</span>
-      <a href="index.html">← Volver a la portada</a>
+    </style>
+</head><body id="inicio">
+<div class="topbar"><div class="container topbar-inner"><span>ArcMap 10.8 desde Cero · Curso aplicado a Colombia</span><a href="index.html">← Volver a la portada</a></div></div>
+<header class="hero"><div class="container hero-content">
+  <div class="badge">📍 Módulo 3 · Duración: 3 horas</div>
+  <h1>Sistemas de Coordenadas y Preparación de Datos</h1>
+  <p class="subtitle">En este módulo aprenderás a entender y revisar las coordenadas de tus capas, diferenciar sistemas geográficos y proyectados, y preparar correctamente los datos para trabajar en ArcMap.</p>
+  <div class="hero-grid">
+    <div class="hero-stat"><strong>Concepto</strong><span>Ubicación del dato</span></div>
+    <div class="hero-stat"><strong>Unidades</strong><span>Grados y metros</span></div>
+    <div class="hero-stat"><strong>Colombia</strong><span>MAGNA-SIRGAS / Origen-Nacional</span></div>
+    <div class="hero-stat"><strong>Producto</strong><span>Capas listas para análisis</span></div>
+  </div>
+</div></header>
+
+<nav><div class="container nav-inner">
+  <a href="#ruta">Ruta de aprendizaje</a><a href="#terminos">Términos clave</a><a href="#objetivo">Objetivo</a><a href="#por-que">¿Por qué importa?</a><a href="#tipos">Tipos de coordenadas</a>
+  <a href="#datum">Datum</a><a href="#proyeccion">Proyección</a><a href="#colombia">Sistemas en Colombia</a><a href="#define-project">Define vs Project</a>
+  <a href="#pasos">Paso a paso</a><a href="#resumen">Resumen</a>
+</div></nav>
+
+<main>
+<section id="ruta"><div class="container">
+  <div class="section-header"><span class="kicker">🧭 Ruta de aprendizaje</span><h2>Cómo avanzarás en este módulo</h2><p class="lead">Primero entenderás la teoría básica y luego la aplicarás para revisar y corregir capas reales.</p></div>
+  <div class="route">
+    <article class="route-step"><div class="num">1</div><h3>Comprender</h3><p>Entenderás qué es un sistema de coordenadas y por qué es indispensable en SIG.</p></article>
+    <article class="route-step"><div class="num">2</div><h3>Diferenciar</h3><p>Distinguirás coordenadas geográficas y proyectadas, además de sus unidades.</p></article>
+    <article class="route-step"><div class="num">3</div><h3>Relacionar</h3><p>Aprenderás qué son datum y proyección cartográfica, y cómo se usan en Colombia.</p></article>
+    <article class="route-step"><div class="num">4</div><h3>Aplicar</h3><p>Usarás correctamente Define Projection y Project para preparar las capas.</p></article>
+  </div>
+</div></section>
+
+
+<section id="terminos">
+  <div class="container">
+    <div class="section-header">
+      <span class="kicker">🔎 Términos clave explicados</span>
+      <h2>Conceptos necesarios para entender coordenadas</h2>
+      <p class="lead">
+        Estos términos son la base del módulo. Si los comprendes, será más fácil revisar, corregir y proyectar capas en ArcMap.
+      </p>
+    </div>
+
+    <div class="grid grid-3">
+      <article class="card">
+        <div class="icon">📍</div>
+        <h3>Coordenada</h3>
+        <p>
+          Es un valor o conjunto de valores que permite ubicar un punto en el espacio. En SIG, una coordenada indica dónde está un elemento sobre la superficie terrestre.
+        </p>
+      </article>
+
+      <article class="card">
+        <div class="icon">🧭</div>
+        <h3>Sistema de coordenadas</h3>
+        <p>
+          Es el conjunto de reglas que define cómo se ubican los datos en el mapa. Le dice a ArcMap cómo interpretar los valores de posición de cada capa.
+        </p>
+      </article>
+
+      <article class="card">
+        <div class="icon">🌐</div>
+        <h3>Coordenadas geográficas</h3>
+        <p>
+          Son coordenadas expresadas en latitud y longitud. Sus unidades son grados. Son comunes en GPS, imágenes satelitales y plataformas web.
+        </p>
+      </article>
+
+      <article class="card">
+        <div class="icon">📏</div>
+        <h3>Coordenadas proyectadas</h3>
+        <p>
+          Son coordenadas expresadas en una superficie plana. Normalmente usan metros, por eso son adecuadas para medir áreas, distancias y hacer buffers.
+        </p>
+      </article>
+
+      <article class="card">
+        <div class="icon">↕️</div>
+        <h3>Latitud</h3>
+        <p>
+          Indica qué tan al norte o al sur está un punto respecto al Ecuador. Se expresa en grados y puede tener valores positivos o negativos.
+        </p>
+      </article>
+
+      <article class="card">
+        <div class="icon">↔️</div>
+        <h3>Longitud</h3>
+        <p>
+          Indica qué tan al este o al oeste está un punto respecto al meridiano de Greenwich. También se expresa en grados.
+        </p>
+      </article>
+
+      <article class="card">
+        <div class="icon">🔢</div>
+        <h3>Grados decimales</h3>
+        <p>
+          Son una forma de escribir latitud y longitud usando números con decimales. Por ejemplo: 7.8890, -76.6340.
+        </p>
+      </article>
+
+      <article class="card">
+        <div class="icon">📐</div>
+        <h3>X / Y</h3>
+        <p>
+          En coordenadas proyectadas, X normalmente representa el valor horizontal o Este, y Y representa el valor vertical o Norte.
+        </p>
+      </article>
+
+      <article class="card">
+        <div class="icon">🌎</div>
+        <h3>Datum</h3>
+        <p>
+          Es la referencia matemática de la Tierra usada para calcular posiciones. Sirve como base para que las coordenadas se ajusten al planeta real.
+        </p>
+      </article>
+
+      <article class="card">
+        <div class="icon">🗺️</div>
+        <h3>Proyección cartográfica</h3>
+        <p>
+          Es el método que transforma la superficie curva de la Tierra en un plano. Permite trabajar en metros, pero siempre genera algún tipo de deformación.
+        </p>
+      </article>
+
+      <article class="card">
+        <div class="icon">🌍</div>
+        <h3>WGS84</h3>
+        <p>
+          Es un sistema de referencia global usado por GPS, imágenes satelitales y muchas plataformas web. Normalmente se trabaja en grados de latitud y longitud.
+        </p>
+      </article>
+
+      <article class="card">
+        <div class="icon">🇨🇴</div>
+        <h3>MAGNA-SIRGAS</h3>
+        <p>
+          Es la referencia geodésica moderna de Colombia. Muchos datos oficiales del país se apoyan en este sistema para mantener coherencia espacial.
+        </p>
+      </article>
+
+      <article class="card">
+        <div class="icon">📏</div>
+        <h3>MAGNA-SIRGAS / Origen-Nacional</h3>
+        <p>
+          Es un sistema proyectado usado en Colombia para trabajar en metros. Es muy útil para análisis espacial, medición de áreas, distancias y buffers.
+        </p>
+      </article>
+
+      <article class="card">
+        <div class="icon">🏷️</div>
+        <h3>EPSG</h3>
+        <p>
+          Es un código que identifica sistemas de coordenadas. Por ejemplo, un sistema puede tener un número EPSG que ayuda a buscarlo correctamente en ArcMap u otros programas SIG.
+        </p>
+      </article>
+
+      <article class="card">
+        <div class="icon">🧾</div>
+        <h3>Spatial Reference</h3>
+        <p>
+          Es la referencia espacial de una capa. En ArcMap se revisa en Layer Properties → Source. Allí puedes ver si la capa está en WGS84, MAGNA-SIRGAS u otro sistema.
+        </p>
+      </article>
+
+      <article class="card">
+        <div class="icon">📌</div>
+        <h3>Define Projection</h3>
+        <p>
+          Es una herramienta que asigna o corrige la etiqueta del sistema de coordenadas de una capa. No transforma los valores de coordenadas.
+        </p>
+      </article>
+
+      <article class="card">
+        <div class="icon">🔁</div>
+        <h3>Project</h3>
+        <p>
+          Es una herramienta que transforma una capa de un sistema de coordenadas a otro. Crea una nueva capa de salida con coordenadas convertidas.
+        </p>
+      </article>
+
+      <article class="card">
+        <div class="icon">🗺️</div>
+        <h3>Data Frame</h3>
+        <p>
+          Es el marco de datos del mapa. También tiene un sistema de coordenadas que controla cómo se visualizan las capas dentro del proyecto.
+        </p>
+      </article>
     </div>
   </div>
+</section>
 
-  <header class="hero">
-    <div class="container hero-content">
-      <div class="badge">📍 Módulo 3 · Duración: 3 horas</div>
-      <h1>Sistemas de Coordenadas y Preparación de Datos</h1>
-      <p class="subtitle">
-        Aprende a explicar y aplicar coordenadas geográficas, coordenadas proyectadas, datum, proyección, WGS84, MAGNA-SIRGAS / Origen-Nacional y la diferencia entre Define Projection y Project.
-      </p>
 
-      <div class="hero-grid">
-        <div class="hero-stat"><strong>Concepto</strong><span>Ubicación en el territorio</span></div>
-        <div class="hero-stat"><strong>Unidades</strong><span>Grados y metros</span></div>
-        <div class="hero-stat"><strong>Colombia</strong><span>MAGNA-SIRGAS / Origen-Nacional</span></div>
-        <div class="hero-stat"><strong>Producto</strong><span>Capas listas para análisis</span></div>
-      </div>
+<section id="objetivo"><div class="container grid grid-2">
+  <div>
+    <div class="section-header"><span class="kicker">🎯 Objetivo</span><h2>Hacer que las capas estén bien ubicadas y hablen el mismo idioma espacial</h2>
+    <p class="lead">Al finalizar, podrás revisar el sistema de coordenadas de una capa, identificar si está en grados o metros y proyectarla adecuadamente para seguir con el curso.</p></div>
+    <div class="callout info"><h3>Idea clave</h3><p>Una capa puede verse bonita en pantalla, pero si su sistema de coordenadas está mal, los análisis, distancias, áreas y recortes pueden salir incorrectos.</p></div>
+  </div>
+  <article class="card"><div class="icon">📌</div><h3>Qué debes lograr</h3>
+    <ul class="mini-list">
+      <li>Diferenciar coordenadas geográficas y proyectadas.</li>
+      <li>Entender qué es un datum y qué es una proyección.</li>
+      <li>Reconocer sistemas usados en Colombia.</li>
+      <li>Aplicar Define Projection y Project correctamente.</li>
+    </ul>
+  </article>
+</div></section>
+
+<section id="por-que"><div class="container grid grid-2">
+  <div>
+    <div class="section-header"><span class="kicker">❓ ¿Por qué importa?</span><h2>Sin coordenadas correctas, las capas no coinciden</h2>
+    <p class="lead">Si una capa está en grados y otra en metros, o si ambas tienen referencias diferentes, pueden aparecer desplazadas o dar resultados erróneos en análisis espaciales.</p></div>
+    <div class="callout warning"><h3>Ejemplo sencillo</h3><p>Si haces un buffer de “100” en una capa geográfica, ese 100 no serán metros. Por eso primero debes revisar y proyectar correctamente la capa.</p></div>
+  </div>
+  <div class="concept-visual">
+    <svg viewBox="0 0 760 430" role="img" aria-label="Capas mal alineadas y capas corregidas">
+      <rect x="20" y="25" width="320" height="360" rx="24" fill="#F3F7FB" stroke="#D6E4F0"/>
+      <text x="180" y="60" text-anchor="middle" font-size="22" font-weight="800" fill="#1F4E79">Capas mal ubicadas</text>
+      <path d="M70 300 C120 230, 180 250, 250 165" fill="none" stroke="#2E75B6" stroke-width="10" stroke-linecap="round"/>
+      <rect x="120" y="120" width="120" height="90" rx="8" fill="#1E6B1E" opacity=".78"/>
+      <circle cx="275" cy="285" r="18" fill="#C55A11"/>
+      <text x="180" y="345" text-anchor="middle" font-size="16" fill="#5B6775">No coinciden espacialmente</text>
+
+      <rect x="420" y="25" width="320" height="360" rx="24" fill="#F3F7FB" stroke="#D6E4F0"/>
+      <text x="580" y="60" text-anchor="middle" font-size="22" font-weight="800" fill="#1F4E79">Capas corregidas</text>
+      <rect x="510" y="135" width="150" height="110" rx="8" fill="#1E6B1E" opacity=".78"/>
+      <path d="M480 280 C530 225, 585 235, 665 150" fill="none" stroke="#2E75B6" stroke-width="10" stroke-linecap="round"/>
+      <circle cx="585" cy="205" r="18" fill="#C55A11"/>
+      <text x="580" y="345" text-anchor="middle" font-size="16" fill="#5B6775">Mismo sistema de coordenadas</text>
+    </svg>
+    <p class="caption">Cuando las capas comparten la misma referencia espacial, coinciden y permiten análisis correctos.</p>
+  </div>
+</div></section>
+
+<section id="tipos"><div class="container">
+  <div class="section-header"><span class="kicker">🧭 Tipos de coordenadas</span><h2>Coordenadas geográficas y coordenadas proyectadas</h2><p class="lead">Esta diferencia es una de las ideas más importantes del módulo.</p></div>
+  <div class="compare">
+    <article class="compare-card">
+      <h3>🌐 Coordenadas geográficas</h3><p>Ubican puntos con latitud y longitud. Sus unidades son grados.</p>
+      <div class="formula">Ejemplo:<br>Latitud 7.889° N<br>Longitud -76.634° W</div>
+      <ul class="mini-list"><li>Usan grados decimales.</li><li>Son comunes en GPS y plataformas web.</li><li>Sirven para ubicar, pero no son las mejores para medir.</li></ul>
+    </article>
+    <article class="compare-card green">
+      <h3>📏 Coordenadas proyectadas</h3><p>Ubican puntos en un plano. Sus unidades suelen ser metros.</p>
+      <div class="formula">Ejemplo:<br>Este 4.850.000 m<br>Norte 2.100.000 m</div>
+      <ul class="mini-list"><li>Usan metros.</li><li>Permiten calcular áreas, distancias y buffers.</li><li>Son ideales para análisis espacial.</li></ul>
+    </article>
+  </div>
+  <div class="concept-visual" style="margin-top:24px;">
+    <svg viewBox="0 0 960 420" role="img" aria-label="Diferencia entre grados y metros">
+      <rect x="30" y="30" width="410" height="330" rx="26" fill="#F3F7FB" stroke="#D6E4F0"/>
+      <circle cx="235" cy="205" r="115" fill="#D6E4F0" stroke="#2E75B6" stroke-width="4"/>
+      <path d="M120 205 H350 M235 90 V320" stroke="#2E75B6" stroke-width="3" opacity=".7"/>
+      <text x="235" y="68" text-anchor="middle" font-size="22" font-weight="800" fill="#1F4E79">Geográficas</text>
+      <text x="235" y="385" text-anchor="middle" font-size="17" fill="#5B6775">Latitud / Longitud · grados</text>
+
+      <rect x="520" y="30" width="410" height="330" rx="26" fill="#F3F7FB" stroke="#D6E4F0"/>
+      <g stroke="#2E75B6" opacity=".55">
+        <path d="M570 90 H880 M570 150 H880 M570 210 H880 M570 270 H880"/>
+        <path d="M610 70 V315 M680 70 V315 M750 70 V315 M820 70 V315"/>
+      </g>
+      <rect x="670" y="135" width="130" height="95" rx="10" fill="#1E6B1E" opacity=".75"/>
+      <circle cx="735" cy="182" r="14" fill="#C55A11"/>
+      <text x="725" y="68" text-anchor="middle" font-size="22" font-weight="800" fill="#1F4E79">Proyectadas</text>
+      <text x="725" y="385" text-anchor="middle" font-size="17" fill="#5B6775">X / Y · metros</text>
+    </svg>
+    <p class="caption">Las geográficas se expresan en grados; las proyectadas en metros.</p>
+  </div>
+</div></section>
+
+<section id="datum"><div class="container grid grid-2">
+  <div>
+    <div class="section-header"><span class="kicker">🌎 Datum</span><h2>El datum es la referencia de la Tierra</h2><p class="lead">El datum define el modelo matemático de la Tierra que usa el sistema de coordenadas. Si dos capas usan datum distintos, pueden no coincidir exactamente.</p></div>
+    <div class="callout info"><h3>Forma sencilla de entenderlo</h3><p>Piensa en el datum como la base o referencia desde la cual se “amarra” la ubicación del dato sobre el planeta.</p></div>
+  </div>
+  <div class="concept-visual">
+    <svg viewBox="0 0 760 430" role="img" aria-label="Datum como referencia terrestre">
+      <rect x="30" y="30" width="700" height="350" rx="28" fill="#F3F7FB" stroke="#D6E4F0"/>
+      <ellipse cx="380" cy="215" rx="225" ry="130" fill="#D6E4F0" stroke="#2E75B6" stroke-width="5"/>
+      <ellipse cx="400" cy="205" rx="225" ry="130" fill="none" stroke="#C55A11" stroke-width="4" stroke-dasharray="12 10"/>
+      <circle cx="440" cy="170" r="12" fill="#1E6B1E"/>
+      <text x="380" y="55" text-anchor="middle" font-size="24" font-weight="900" fill="#1F4E79">Misma Tierra, referencias distintas</text>
+    </svg>
+    <p class="caption">Un mismo punto puede variar ligeramente si se calcula con referencias distintas.</p>
+  </div>
+</div></section>
+
+<section id="proyeccion"><div class="container">
+  <div class="section-header"><span class="kicker">🗺️ Proyección cartográfica</span><h2>Proyectar es pasar de la superficie curva a un plano</h2><p class="lead">Las proyecciones cartográficas permiten representar la Tierra en una superficie plana, aunque siempre deforman algo.</p></div>
+  <div class="grid grid-3">
+    <article class="card"><div class="icon">📐</div><h3>Siempre deforma algo</h3><p>Puede alterar áreas, formas, distancias o direcciones.</p></article>
+    <article class="card"><div class="icon">📏</div><h3>Permite medir</h3><p>Hace posible calcular distancias y áreas con unidades lineales como metros.</p></article>
+    <article class="card"><div class="icon">🇨🇴</div><h3>Debe elegirse bien</h3><p>En Colombia conviene usar sistemas apropiados al territorio nacional.</p></article>
+  </div>
+</div></section>
+
+<section id="colombia"><div class="container">
+  <div class="section-header"><span class="kicker">🇨🇴 Sistemas en Colombia</span><h2>Sistemas que debes reconocer durante el curso</h2><p class="lead">No todos los datos llegan con la misma referencia. Por eso debes aprender a identificarlos.</p></div>
+  <div class="grid grid-3">
+    <article class="card"><div class="icon">🌐</div><h3>WGS84</h3><p>Sistema muy común en GPS, plataformas web e imágenes satelitales. Normalmente aparece en coordenadas geográficas.</p></article>
+    <article class="card"><div class="icon">📍</div><h3>MAGNA-SIRGAS</h3><p>Es la referencia geodésica moderna de Colombia. Muchos datos oficiales del país la usan.</p></article>
+    <article class="card"><div class="icon">📏</div><h3>MAGNA-SIRGAS / Origen-Nacional</h3><p>Sistema proyectado usado para cartografía oficial y análisis en metros dentro de Colombia.</p></article>
+  </div>
+  <div class="callout success"><h3>Recuerda</h3><p>WGS84 es muy común para ubicar. MAGNA-SIRGAS / Origen-Nacional es muy útil para medir y analizar en Colombia.</p></div>
+</div></section>
+
+<section id="define-project"><div class="container">
+  <div class="section-header"><span class="kicker">🔁 Herramientas críticas</span><h2>Define Projection y Project no significan lo mismo</h2><p class="lead">Esta diferencia es fundamental y debes dominarla para no dañar tus capas.</p></div>
+  <div class="compare">
+    <article class="compare-card"><h3>📌 Define Projection</h3><p>Se usa cuando la capa ya tiene coordenadas correctas, pero no tiene definido el sistema.</p>
+      <ul class="mini-list"><li>No transforma coordenadas.</li><li>Solo asigna la etiqueta del sistema.</li><li>Se usa cuando conoces el sistema original.</li></ul>
+    </article>
+    <article class="compare-card green"><h3>🔁 Project</h3><p>Se usa cuando deseas convertir una capa de un sistema a otro.</p>
+      <ul class="mini-list"><li>Sí transforma coordenadas.</li><li>Crea una nueva capa de salida.</li><li>Se usa para pasar de grados a metros, por ejemplo.</li></ul>
+    </article>
+  </div>
+  <div class="concept-visual" style="margin-top:24px;">
+    <svg viewBox="0 0 960 440" role="img" aria-label="Define Projection vs Project">
+      <rect x="30" y="40" width="400" height="320" rx="28" fill="#F3F7FB" stroke="#D6E4F0"/>
+      <text x="230" y="80" text-anchor="middle" font-size="24" font-weight="900" fill="#1F4E79">Define Projection</text>
+      <rect x="110" y="125" width="240" height="90" rx="16" fill="#FFFFFF" stroke="#2E75B6" stroke-width="4"/>
+      <text x="230" y="160" text-anchor="middle" font-size="17" fill="#1F2937">Capa sin etiqueta</text>
+      <path d="M230 230 V275" stroke="#C55A11" stroke-width="7" stroke-linecap="round"/>
+      <path d="M210 260 L230 285 L250 260" fill="none" stroke="#C55A11" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+      <text x="230" y="320" text-anchor="middle" font-size="16" fill="#5B6775">Solo define el sistema</text>
+
+      <rect x="530" y="40" width="400" height="320" rx="28" fill="#F3F7FB" stroke="#D6E4F0"/>
+      <text x="730" y="80" text-anchor="middle" font-size="24" font-weight="900" fill="#1E6B1E">Project</text>
+      <rect x="585" y="125" width="120" height="90" rx="16" fill="#FFFFFF" stroke="#2E75B6" stroke-width="4"/>
+      <text x="645" y="160" text-anchor="middle" font-size="15" fill="#1F2937">WGS84</text>
+      <path d="M720 170 H775" stroke="#C55A11" stroke-width="7" stroke-linecap="round"/>
+      <path d="M760 150 L785 170 L760 190" fill="none" stroke="#C55A11" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+      <rect x="800" y="125" width="90" height="90" rx="16" fill="#FFFFFF" stroke="#1E6B1E" stroke-width="4"/>
+      <text x="845" y="170" text-anchor="middle" font-size="14" fill="#1F2937">Origen</text>
+      <text x="845" y="190" text-anchor="middle" font-size="14" fill="#1F2937">Nacional</text>
+      <text x="730" y="320" text-anchor="middle" font-size="16" fill="#5B6775">Transforma y crea una nueva capa</text>
+    </svg>
+    <p class="caption">Define Projection etiqueta la capa. Project la transforma a otro sistema.</p>
+  </div>
+</div></section>
+
+<section id="pasos"><div class="container">
+  <div class="section-header"><span class="kicker">🧪 Paso a paso</span><h2>Preparar las capas descargadas</h2><p class="lead">Usa el municipio, las vías, los ríos y demás capas descargadas en el módulo anterior.</p></div>
+  <div class="step-list">
+    <div class="step"><div><strong>Cargar las capas en ArcMap.</strong><p>Agrega municipio, vías, ríos y centros poblados.</p></div></div>
+    <div class="step"><div><strong>Revisar el sistema de cada capa.</strong><p>Haz clic derecho sobre la capa y revisa <strong>Properties → Source</strong>.</p></div></div>
+    <div class="step"><div><strong>Identificar capas sin referencia definida.</strong><p>Si aparecen como Unknown, no las proyectes todavía sin revisar primero su origen.</p></div></div>
+    <div class="step"><div><strong>Aplicar Define Projection cuando sea necesario.</strong><p>Hazlo solo si conoces con seguridad el sistema original.</p></div></div>
+    <div class="step"><div><strong>Aplicar Project para transformar.</strong><p>Lleva las capas al sistema de trabajo que usarás durante el curso.</p></div></div>
+    <div class="step"><div><strong>Guardar los resultados.</strong><p>Guarda las nuevas capas proyectadas en la carpeta de resultados.</p></div></div>
+    <div class="step"><div><strong>Verificar que todo coincida.</strong><p>Comprueba que las capas queden correctamente alineadas.</p></div></div>
+  </div>
+</div></section>
+
+<section id="resumen"><div class="container">
+  <div class="callout warning"><span class="kicker">⚠️ Errores comunes</span><h2>Evita estos errores</h2>
+    <div class="error-grid">
+      <div class="error-item"><span>⚠️</span><div><strong>Confundir Define Projection con Project.</strong><p>Una no transforma; la otra sí.</p></div></div>
+      <div class="error-item"><span>⚠️</span><div><strong>Hacer análisis en grados.</strong><p>Para medir o hacer buffers conviene trabajar en metros.</p></div></div>
+      <div class="error-item"><span>⚠️</span><div><strong>Asignar un sistema al azar.</strong><p>No inventes la proyección de una capa si no conoces su origen.</p></div></div>
+      <div class="error-item"><span>⚠️</span><div><strong>No revisar todas las capas.</strong><p>Debes comprobar una por una antes del análisis.</p></div></div>
     </div>
-  </header>
-
-  <nav aria-label="Navegación del módulo">
-    <div class="container nav-inner">
-      <a href="#objetivo">Objetivo</a>
-      <a href="#temas">Temas</a>
-      <a href="#por-que">¿Por qué importa?</a>
-      <a href="#tipos">Tipos de coordenadas</a>
-      <a href="#datum">Datum</a>
-      <a href="#proyeccion">Proyección</a>
-      <a href="#colombia">Colombia</a>
-      <a href="#define-project">Define vs Project</a>
-      <a href="#arcmap">En ArcMap</a>
-      <a href="#paso-a-paso">Paso a paso</a>
-      <a href="#errores">Errores</a>
-      <a href="#resultado">Resultado</a>
-    </div>
-  </nav>
-
-  <main>
-    <section id="objetivo">
-      <div class="container grid grid-2">
-        <div>
-          <div class="section-header">
-            <span class="kicker">🎯 Objetivo del módulo</span>
-            <h2>Entender dónde están las capas y cómo hacer que coincidan</h2>
-            <p class="lead">
-              El estudiante aprenderá a revisar el sistema de coordenadas de una capa, diferenciar coordenadas geográficas y proyectadas, y preparar las capas del municipio para trabajar en un mismo sistema.
-            </p>
-          </div>
-
-          <div class="callout info">
-            <h3>Idea clave</h3>
-            <p>
-              Un sistema de coordenadas es como la dirección de una casa, pero aplicada al territorio. Sin esa dirección, ArcMap no sabe dónde ubicar correctamente una capa.
-            </p>
-          </div>
-        </div>
-
-        <article class="card">
-          <div class="icon">📌</div>
-          <h3>Producto final del módulo</h3>
-          <p>
-            Capas vectoriales revisadas, corregidas y proyectadas al sistema adecuado para análisis espacial en Colombia, guardadas en la carpeta de resultados.
-          </p>
-          <ul class="mini-list">
-            <li>Spatial Reference revisado.</li>
-            <li>Capas sin proyección identificadas.</li>
-            <li>Define Projection usado solo cuando corresponde.</li>
-            <li>Project usado para transformar coordenadas.</li>
-          </ul>
-        </article>
-      </div>
-    </section>
-
-    <section id="temas">
-      <div class="container">
-        <div class="section-header">
-          <span class="kicker">📚 Temas del módulo</span>
-          <h2>Ruta de aprendizaje</h2>
-        </div>
-
-        <ol class="number-list">
-          <li><span>Qué es un sistema de coordenadas y por qué cada capa necesita uno.</span></li>
-          <li><span>Diferencia entre coordenadas geográficas y coordenadas proyectadas.</span></li>
-          <li><span>Qué significa latitud, longitud, X, Y, grados y metros.</span></li>
-          <li><span>Qué es un datum y por qué WGS84 no es lo mismo que MAGNA-SIRGAS.</span></li>
-          <li><span>Qué es una proyección cartográfica y por qué se usa para medir distancias y áreas.</span></li>
-          <li><span>Sistemas usados en Colombia: WGS84, MAGNA-SIRGAS y MAGNA-SIRGAS / Origen-Nacional, conocido en muchos materiales como CTM12.</span></li>
-          <li><span>Diferencia entre Define Projection y Project.</span></li>
-          <li><span>Cómo revisar coordenadas en ArcMap desde Layer Properties y Data Frame Properties.</span></li>
-          <li><span>Cómo preparar el área de estudio municipal para los siguientes análisis.</span></li>
-        </ol>
-      </div>
-    </section>
-
-    <section id="herramientas">
-      <div class="container">
-        <div class="section-header">
-          <span class="kicker">🧰 Herramientas de ArcMap</span>
-          <h2>Herramientas que se usan en este módulo</h2>
-        </div>
-
-        <div class="tool-badges">
-          <span class="tool-badge">🎨 Layer Properties</span>
-          <span class="tool-badge">🗺️ Data Frame Properties</span>
-          <span class="tool-badge">🧰 ArcToolbox</span>
-          <span class="tool-badge">📌 Define Projection</span>
-          <span class="tool-badge">🔁 Project</span>
-          <span class="tool-badge">✂️ Clip</span>
-          <span class="tool-badge">📁 ArcCatalog</span>
-          <span class="tool-badge">➕ Add Data</span>
-        </div>
-      </div>
-    </section>
-
-    <section id="por-que">
-      <div class="container grid grid-2">
-        <div>
-          <div class="section-header">
-            <span class="kicker">❓ ¿Por qué importa?</span>
-            <h2>Si las coordenadas están mal, el análisis sale mal</h2>
-            <p class="lead">
-              Cuando dos capas no tienen el mismo sistema de referencia, pueden aparecer lejos, superpuestas incorrectamente o medir distancias equivocadas.
-            </p>
-          </div>
-
-          <div class="callout warning">
-            <h3>Ejemplo fácil</h3>
-            <p>
-              Si una capa está en grados y otra en metros, ArcMap puede mostrarlas desalineadas. También puedes calcular un buffer de “100” pensando que son metros, pero en realidad la capa puede estar en grados.
-            </p>
-          </div>
-        </div>
-
-        <div class="concept-visual">
-          <svg viewBox="0 0 760 430" role="img" aria-label="Capas desalineadas y capas corregidas">
-            <rect x="20" y="25" width="320" height="360" rx="24" fill="#F3F7FB" stroke="#D6E4F0"/>
-            <text x="180" y="60" text-anchor="middle" font-size="22" font-weight="800" fill="#1F4E79">Capas mal ubicadas</text>
-            <path d="M70 300 C120 230, 180 250, 250 165" fill="none" stroke="#2E75B6" stroke-width="10" stroke-linecap="round"/>
-            <rect x="120" y="120" width="120" height="90" rx="8" fill="#1E6B1E" opacity=".78"/>
-            <circle cx="275" cy="285" r="18" fill="#C55A11"/>
-            <text x="180" y="345" text-anchor="middle" font-size="16" fill="#5B6775">No coinciden espacialmente</text>
-
-            <rect x="420" y="25" width="320" height="360" rx="24" fill="#F3F7FB" stroke="#D6E4F0"/>
-            <text x="580" y="60" text-anchor="middle" font-size="22" font-weight="800" fill="#1F4E79">Capas corregidas</text>
-            <rect x="510" y="135" width="150" height="110" rx="8" fill="#1E6B1E" opacity=".78"/>
-            <path d="M480 280 C530 225, 585 235, 665 150" fill="none" stroke="#2E75B6" stroke-width="10" stroke-linecap="round"/>
-            <circle cx="585" cy="205" r="18" fill="#C55A11"/>
-            <text x="580" y="345" text-anchor="middle" font-size="16" fill="#5B6775">Mismo sistema de coordenadas</text>
-          </svg>
-          <p class="caption">Ilustración didáctica: cuando las capas comparten sistema de coordenadas, se alinean correctamente para análisis.</p>
-        </div>
-      </div>
-    </section>
-
-    <section id="tipos">
-      <div class="container">
-        <div class="section-header">
-          <span class="kicker">🧭 Tipos de coordenadas</span>
-          <h2>Coordenadas geográficas vs. coordenadas proyectadas</h2>
-          <p class="lead">
-            Esta es la explicación central del módulo. El estudiante debe comprender que no todas las coordenadas se expresan igual.
-          </p>
-        </div>
-
-        <div class="compare">
-          <article class="compare-card">
-            <h3>🌐 Coordenadas geográficas</h3>
-            <p>Ubican puntos usando latitud y longitud sobre la Tierra. Sus unidades son grados decimales.</p>
-            <div class="formula">Ejemplo: Latitud 7.8790° N<br>Longitud -72.5078° W</div>
-            <ul class="mini-list">
-              <li>Usan grados.</li>
-              <li>Son comunes en GPS.</li>
-              <li>WGS84 es el ejemplo más conocido.</li>
-              <li>No son ideales para medir áreas o distancias.</li>
-            </ul>
-          </article>
-
-          <article class="compare-card green">
-            <h3>📏 Coordenadas proyectadas</h3>
-            <p>Ubican puntos sobre un plano. Sus unidades normalmente son metros, por eso son mejores para medir.</p>
-            <div class="formula">Ejemplo: Este 4.850.000 m<br>Norte 2.100.000 m</div>
-            <ul class="mini-list">
-              <li>Usan metros.</li>
-              <li>Permiten medir distancias y áreas.</li>
-              <li>Son necesarias para buffers y geoprocesamiento.</li>
-              <li>En Colombia se recomienda MAGNA-SIRGAS / Origen-Nacional para cartografía oficial.</li>
-            </ul>
-          </article>
-        </div>
-
-        <div class="concept-visual" style="margin-top:24px;">
-          <svg viewBox="0 0 960 420" role="img" aria-label="Diferencia entre grados y metros">
-            <rect x="30" y="30" width="410" height="330" rx="26" fill="#F3F7FB" stroke="#D6E4F0"/>
-            <circle cx="235" cy="205" r="115" fill="#D6E4F0" stroke="#2E75B6" stroke-width="4"/>
-            <path d="M120 205 H350 M235 90 V320" stroke="#2E75B6" stroke-width="3" opacity=".7"/>
-            <path d="M150 135 C210 165 275 165 325 135" fill="none" stroke="#1E6B1E" stroke-width="5"/>
-            <path d="M150 275 C210 245 275 245 325 275" fill="none" stroke="#1E6B1E" stroke-width="5"/>
-            <text x="235" y="68" text-anchor="middle" font-size="22" font-weight="800" fill="#1F4E79">Geográficas</text>
-            <text x="235" y="385" text-anchor="middle" font-size="17" fill="#5B6775">Latitud / Longitud · grados</text>
-
-            <rect x="520" y="30" width="410" height="330" rx="26" fill="#F3F7FB" stroke="#D6E4F0"/>
-            <g stroke="#2E75B6" opacity=".55">
-              <path d="M570 90 H880 M570 150 H880 M570 210 H880 M570 270 H880"/>
-              <path d="M610 70 V315 M680 70 V315 M750 70 V315 M820 70 V315"/>
-            </g>
-            <rect x="670" y="135" width="130" height="95" rx="10" fill="#1E6B1E" opacity=".75"/>
-            <circle cx="735" cy="182" r="14" fill="#C55A11"/>
-            <text x="725" y="68" text-anchor="middle" font-size="22" font-weight="800" fill="#1F4E79">Proyectadas</text>
-            <text x="725" y="385" text-anchor="middle" font-size="17" fill="#5B6775">X / Y · metros</text>
-          </svg>
-          <p class="caption">Las coordenadas geográficas se expresan en grados; las proyectadas se expresan en metros y son mejores para análisis espacial.</p>
-        </div>
-      </div>
-    </section>
-
-    <section id="datum">
-      <div class="container grid grid-2">
-        <div>
-          <div class="section-header">
-            <span class="kicker">🌎 Datum</span>
-            <h2>El datum es la referencia de la Tierra que usa el mapa</h2>
-            <p class="lead">
-              El datum define el modelo matemático de la Tierra y el punto de referencia desde el cual se calculan las coordenadas. Dos capas pueden tener valores parecidos, pero si usan datum diferentes, no siempre coinciden exactamente.
-            </p>
-          </div>
-
-          <div class="callout info">
-            <h3>Cómo explicarlo sencillo</h3>
-            <p>
-              Imagina que varias personas dibujan la misma montaña usando reglas distintas. Todas dibujan la montaña, pero las medidas pueden variar. El datum es esa regla de referencia.
-            </p>
-          </div>
-        </div>
-
-        <div class="concept-visual">
-          <svg viewBox="0 0 760 430" role="img" aria-label="Datum como modelo de referencia terrestre">
-            <rect x="30" y="30" width="700" height="350" rx="28" fill="#F3F7FB" stroke="#D6E4F0"/>
-            <ellipse cx="380" cy="215" rx="225" ry="130" fill="#D6E4F0" stroke="#2E75B6" stroke-width="5"/>
-            <ellipse cx="400" cy="205" rx="225" ry="130" fill="none" stroke="#C55A11" stroke-width="4" stroke-dasharray="12 10"/>
-            <circle cx="440" cy="170" r="12" fill="#1E6B1E"/>
-            <text x="440" y="150" text-anchor="middle" font-size="16" font-weight="800" fill="#1E6B1E">Punto</text>
-            <text x="380" y="55" text-anchor="middle" font-size="24" font-weight="900" fill="#1F4E79">Mismo territorio, referencias diferentes</text>
-            <text x="190" y="345" text-anchor="middle" font-size="17" fill="#2E75B6">Modelo A</text>
-            <text x="570" y="345" text-anchor="middle" font-size="17" fill="#C55A11">Modelo B</text>
-          </svg>
-          <p class="caption">Ilustración: dos referencias distintas pueden ubicar el mismo punto con pequeñas diferencias.</p>
-        </div>
-      </div>
-    </section>
-
-    <section id="proyeccion">
-      <div class="container">
-        <div class="section-header">
-          <span class="kicker">🗺️ Proyección cartográfica</span>
-          <h2>Proyectar es pasar la Tierra curva a un plano</h2>
-          <p class="lead">
-            Toda proyección transforma la superficie curva de la Tierra en un plano. Esto permite trabajar en mapas impresos o digitales, pero siempre introduce algún tipo de deformación.
-          </p>
-        </div>
-
-        <div class="grid grid-3">
-          <article class="card">
-            <div class="icon">📐</div>
-            <h3>Deforma algo</h3>
-            <p>Puede deformar áreas, formas, distancias o direcciones. No existe una proyección perfecta para todo.</p>
-          </article>
-
-          <article class="card">
-            <div class="icon">📏</div>
-            <h3>Permite medir</h3>
-            <p>Cuando una capa está proyectada en metros, puedes calcular distancias, áreas, buffers y análisis de proximidad.</p>
-          </article>
-
-          <article class="card">
-            <div class="icon">🇨🇴</div>
-            <h3>Debe ser adecuada al país</h3>
-            <p>Para Colombia se usa MAGNA-SIRGAS / Origen-Nacional en cartografía oficial moderna y muchos cursos lo reconocen como CTM12.</p>
-          </article>
-        </div>
-
-        <div class="concept-visual" style="margin-top:24px;">
-          <svg viewBox="0 0 960 390" role="img" aria-label="De la esfera al plano">
-            <rect x="25" y="35" width="910" height="300" rx="28" fill="#F3F7FB" stroke="#D6E4F0"/>
-            <circle cx="210" cy="190" r="105" fill="#D6E4F0" stroke="#2E75B6" stroke-width="5"/>
-            <path d="M115 190 H305 M210 85 V295" stroke="#2E75B6" stroke-width="3" opacity=".55"/>
-            <path d="M155 115 C210 145 260 145 295 115" stroke="#1E6B1E" stroke-width="5" fill="none"/>
-            <path d="M155 265 C210 235 260 235 295 265" stroke="#1E6B1E" stroke-width="5" fill="none"/>
-            <text x="210" y="330" text-anchor="middle" fill="#1F4E79" font-size="18" font-weight="800">Tierra curva</text>
-
-            <path d="M365 190 H535" stroke="#C55A11" stroke-width="8" stroke-linecap="round"/>
-            <path d="M515 170 L545 190 L515 210" fill="none" stroke="#C55A11" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
-            <text x="455" y="150" text-anchor="middle" fill="#C55A11" font-size="18" font-weight="800">Proyección</text>
-
-            <rect x="610" y="95" width="230" height="190" rx="16" fill="#FFFFFF" stroke="#2E75B6" stroke-width="5"/>
-            <g stroke="#2E75B6" opacity=".45">
-              <path d="M650 115 V265 M690 115 V265 M730 115 V265 M770 115 V265 M810 115 V265"/>
-              <path d="M630 130 H820 M630 170 H820 M630 210 H820 M630 250 H820"/>
-            </g>
-            <text x="725" y="330" text-anchor="middle" fill="#1F4E79" font-size="18" font-weight="800">Plano en metros</text>
-          </svg>
-          <p class="caption">La proyección permite pasar de una superficie curva a una grilla plana para hacer mediciones.</p>
-        </div>
-      </div>
-    </section>
-
-    <section id="colombia">
-      <div class="container">
-        <div class="section-header">
-          <span class="kicker">🇨🇴 Sistemas para Colombia</span>
-          <h2>WGS84, MAGNA-SIRGAS y Origen-Nacional</h2>
-          <p class="lead">
-            En Colombia encontrarás diferentes sistemas según el origen del dato. Lo importante es reconocerlos, no mezclarlos sin revisar y proyectar cuando sea necesario.
-          </p>
-        </div>
-
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Sistema</th>
-                <th>Tipo</th>
-                <th>Unidades</th>
-                <th>Uso común</th>
-                <th>Precaución</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>WGS84</td>
-                <td>Coordenadas geográficas</td>
-                <td>Grados decimales</td>
-                <td>GPS, imágenes satelitales, datos globales, plataformas web.</td>
-                <td>No es ideal para medir áreas, distancias o buffers.</td>
-              </tr>
-              <tr>
-                <td>MAGNA-SIRGAS</td>
-                <td>Datum / sistema de referencia geodésico</td>
-                <td>Depende de la proyección usada</td>
-                <td>Referencia nacional moderna para datos oficiales de Colombia.</td>
-                <td>Verifica si la capa está geográfica o proyectada.</td>
-              </tr>
-              <tr>
-                <td>MAGNA-SIRGAS / Origen-Nacional</td>
-                <td>Coordenadas proyectadas</td>
-                <td>Metros</td>
-                <td>Cartografía oficial moderna, catastro, análisis espacial nacional.</td>
-                <td>En muchos materiales se conoce como CTM12; su código EPSG moderno es 9377.</td>
-              </tr>
-              <tr>
-                <td>Orígenes Gauss-Krüger antiguos o locales</td>
-                <td>Coordenadas proyectadas</td>
-                <td>Metros</td>
-                <td>Cartografía histórica o local.</td>
-                <td>No asumir que es igual a Origen-Nacional; revisar siempre.</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div class="callout info">
-          <h3>Resumen importante</h3>
-          <p>
-            Recuerda: WGS84 sirve para ubicar globalmente; MAGNA-SIRGAS es la referencia nacional; y MAGNA-SIRGAS / Origen-Nacional permite trabajar en metros para análisis espacial en Colombia.
-          </p>
-        </div>
-      </div>
-    </section>
-
-    <section id="define-project">
-      <div class="container">
-        <div class="section-header">
-          <span class="kicker">🔁 Herramientas críticas</span>
-          <h2>Define Projection no es lo mismo que Project</h2>
-          <p class="lead">
-            Esta diferencia debe quedar totalmente clara. Es uno de los errores más comunes en ArcMap.
-          </p>
-        </div>
-
-        <div class="compare">
-          <article class="compare-card">
-            <h3>📌 Define Projection</h3>
-            <p>
-              Se usa cuando la capa ya tiene coordenadas correctas, pero ArcMap no sabe qué sistema tienen porque falta la definición o el archivo .prj.
-            </p>
-            <ul class="mini-list">
-              <li>No transforma coordenadas.</li>
-              <li>No mueve la capa realmente.</li>
-              <li>Solo escribe o asigna la etiqueta del sistema.</li>
-              <li>Se usa cuando conoces con seguridad el sistema original.</li>
-            </ul>
-          </article>
-
-          <article class="compare-card green">
-            <h3>🔁 Project</h3>
-            <p>
-              Se usa cuando quieres cambiar una capa de un sistema de coordenadas a otro, por ejemplo de WGS84 a MAGNA-SIRGAS / Origen-Nacional.
-            </p>
-            <ul class="mini-list">
-              <li>Sí transforma coordenadas.</li>
-              <li>Crea una nueva capa de salida.</li>
-              <li>Debe usarse para unificar capas antes del análisis.</li>
-              <li>Es la herramienta correcta para pasar de grados a metros.</li>
-            </ul>
-          </article>
-        </div>
-
-        <div class="concept-visual" style="margin-top:24px;">
-          <svg viewBox="0 0 960 440" role="img" aria-label="Define Projection vs Project">
-            <rect x="30" y="40" width="400" height="320" rx="28" fill="#F3F7FB" stroke="#D6E4F0"/>
-            <text x="230" y="80" text-anchor="middle" font-size="24" font-weight="900" fill="#1F4E79">Define Projection</text>
-            <rect x="110" y="125" width="240" height="90" rx="16" fill="#FFFFFF" stroke="#2E75B6" stroke-width="4"/>
-            <text x="230" y="160" text-anchor="middle" font-size="17" fill="#1F2937">Capa sin etiqueta</text>
-            <text x="230" y="188" text-anchor="middle" font-size="15" fill="#5B6775">Las coordenadas ya existen</text>
-            <path d="M230 230 V275" stroke="#C55A11" stroke-width="7" stroke-linecap="round"/>
-            <path d="M210 260 L230 285 L250 260" fill="none" stroke="#C55A11" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
-            <text x="230" y="320" text-anchor="middle" font-size="16" fill="#5B6775">Solo asigna el nombre del sistema</text>
-
-            <rect x="530" y="40" width="400" height="320" rx="28" fill="#F3F7FB" stroke="#D6E4F0"/>
-            <text x="730" y="80" text-anchor="middle" font-size="24" font-weight="900" fill="#1E6B1E">Project</text>
-            <rect x="585" y="125" width="120" height="90" rx="16" fill="#FFFFFF" stroke="#2E75B6" stroke-width="4"/>
-            <text x="645" y="160" text-anchor="middle" font-size="15" fill="#1F2937">WGS84</text>
-            <text x="645" y="188" text-anchor="middle" font-size="13" fill="#5B6775">grados</text>
-            <path d="M720 170 H775" stroke="#C55A11" stroke-width="7" stroke-linecap="round"/>
-            <path d="M760 150 L785 170 L760 190" fill="none" stroke="#C55A11" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
-            <rect x="800" y="125" width="90" height="90" rx="16" fill="#FFFFFF" stroke="#1E6B1E" stroke-width="4"/>
-            <text x="845" y="156" text-anchor="middle" font-size="14" fill="#1F2937">Origen</text>
-            <text x="845" y="178" text-anchor="middle" font-size="14" fill="#1F2937">Nacional</text>
-            <text x="845" y="200" text-anchor="middle" font-size="13" fill="#5B6775">metros</text>
-            <text x="730" y="320" text-anchor="middle" font-size="16" fill="#5B6775">Transforma y crea una nueva capa</text>
-          </svg>
-          <p class="caption">Define Projection etiqueta; Project transforma. No se deben intercambiar.</p>
-        </div>
-      </div>
-    </section>
-
-    <section id="arcmap">
-      <div class="container">
-        <div class="section-header">
-          <span class="kicker">🖥️ En ArcMap</span>
-          <h2>Cómo revisar el sistema de coordenadas</h2>
-          <p class="lead">
-            Antes de cualquier análisis, revisa el sistema de cada capa y del Data Frame.
-          </p>
-        </div>
-
-        <div class="grid grid-3">
-          <article class="card">
-            <div class="icon">1️⃣</div>
-            <h3>Clic derecho sobre la capa</h3>
-            <p>En Table of Contents, haz clic derecho sobre la capa que quieres revisar.</p>
-          </article>
-
-          <article class="card">
-            <div class="icon">2️⃣</div>
-            <h3>Properties</h3>
-            <p>Abre la ventana de propiedades de la capa.</p>
-          </article>
-
-          <article class="card">
-            <div class="icon">3️⃣</div>
-            <h3>Source</h3>
-            <p>En la pestaña Source, busca el campo Spatial Reference.</p>
-          </article>
-
-          <article class="card">
-            <div class="icon">4️⃣</div>
-            <h3>Revisar unidades</h3>
-            <p>Si ves grados, es geográfica. Si ves metros, está proyectada.</p>
-          </article>
-
-          <article class="card">
-            <div class="icon">5️⃣</div>
-            <h3>Data Frame</h3>
-            <p>También revisa Data Frame Properties → Coordinate System.</p>
-          </article>
-
-          <article class="card">
-            <div class="icon">6️⃣</div>
-            <h3>Unificar</h3>
-            <p>Proyecta las capas que lo requieran y guarda nuevas salidas en Resultados.</p>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <section id="paso-a-paso">
-      <div class="container">
-        <div class="section-header">
-          <span class="kicker">🧪 Ejercicio práctico</span>
-          <h2>Preparar capas de un municipio colombiano</h2>
-          <p class="lead">
-            Usa las capas descargadas en el Módulo 2: límite municipal, vías, ríos y centros poblados.
-          </p>
-        </div>
-
-        <div class="step-list">
-          <div class="step"><div><strong>Cargar las capas.</strong><p>Agrega límite municipal, vías, ríos y centros poblados al proyecto.</p></div></div>
-          <div class="step"><div><strong>Revisar Spatial Reference.</strong><p>Abre Layer Properties → Source y verifica el sistema de cada capa.</p></div></div>
-          <div class="step"><div><strong>Identificar capas sin proyección.</strong><p>Si ArcMap muestra Unknown, revisa la fuente del dato antes de asignar sistema.</p></div></div>
-          <div class="step"><div><strong>Usar Define Projection solo si corresponde.</strong><p>Aplica Define Projection únicamente cuando sabes cuál era el sistema original y solo falta la definición.</p></div></div>
-          <div class="step"><div><strong>Usar Project para transformar.</strong><p>Proyecta las capas al sistema de trabajo, por ejemplo MAGNA-SIRGAS / Origen-Nacional.</p></div></div>
-          <div class="step"><div><strong>Guardar nuevas salidas.</strong><p>Guarda las capas proyectadas en 05_Resultados con nombres claros.</p></div></div>
-          <div class="step"><div><strong>Verificar alineación.</strong><p>Confirma que vías, ríos, centros poblados y municipio coincidan espacialmente.</p></div></div>
-          <div class="step"><div><strong>Preparar área de estudio.</strong><p>Usa el municipio como límite para recortes posteriores en geoprocesamiento y análisis ráster.</p></div></div>
-        </div>
-      </div>
-    </section>
-
-    <section id="errores">
-      <div class="container">
-        <div class="callout warning">
-          <span class="kicker">⚠️ Errores comunes</span>
-          <h2>Problemas frecuentes con coordenadas</h2>
-
-          <div class="error-grid">
-            <div class="error-item"><span>⚠️</span><div><strong>Confundir Define Projection con Project.</strong><p>Define Projection no transforma coordenadas; Project sí.</p></div></div>
-            <div class="error-item"><span>⚠️</span><div><strong>Hacer buffer en grados.</strong><p>Antes de buffers o distancias, proyecta la capa a metros.</p></div></div>
-            <div class="error-item"><span>⚠️</span><div><strong>Trabajar con capas en sistemas diferentes.</strong><p>Unifica el sistema antes de geoprocesar.</p></div></div>
-            <div class="error-item"><span>⚠️</span><div><strong>Asignar un sistema al azar.</strong><p>No uses Define Projection sin conocer el sistema original.</p></div></div>
-            <div class="error-item"><span>⚠️</span><div><strong>No guardar la capa proyectada.</strong><p>Project crea una nueva capa; guárdala con nombre claro.</p></div></div>
-            <div class="error-item"><span>⚠️</span><div><strong>No revisar el Data Frame.</strong><p>El Data Frame también tiene sistema de coordenadas y afecta la visualización.</p></div></div>
-            <div class="error-item"><span>⚠️</span><div><strong>Confiarse porque “se ve bien”.</strong><p>Que se vea alineado no significa que esté listo para medir. Revisa unidades y sistema.</p></div></div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section id="resultado">
-      <div class="container">
-        <div class="callout success">
-          <span class="kicker">✅ Resultado esperado</span>
-          <h2>Al finalizar el Módulo 3 las capas estarán listas para análisis</h2>
-          <p>
-            El estudiante debe comprender los tipos de coordenadas y aplicar correctamente las herramientas de ArcMap para preparar los datos del municipio.
-          </p>
-
-          <ul class="checklist">
-            <li>Explica qué es un sistema de coordenadas.</li>
-            <li>Diferencia coordenadas geográficas y proyectadas.</li>
-            <li>Reconoce grados y metros como unidades distintas.</li>
-            <li>Entiende qué es datum y qué es proyección.</li>
-            <li>Identifica WGS84 y MAGNA-SIRGAS.</li>
-            <li>Reconoce MAGNA-SIRGAS / Origen-Nacional como sistema proyectado oficial moderno para Colombia.</li>
-            <li>Usa Define Projection solo para asignar sistema conocido.</li>
-            <li>Usa Project para transformar capas a otro sistema.</li>
-            <li>Guarda las capas corregidas en la carpeta de resultados.</li>
-            <li>Prepara el límite municipal para los siguientes módulos.</li>
-          </ul>
-        </div>
-
-        <div class="callout info">
-          <h3>🚀 Próximo módulo</h3>
-          <p>
-            En el Módulo 4 aprenderás a manejar datos vectoriales: simbología, etiquetas, tabla de atributos, selecciones, joins, edición y digitalización.
-          </p>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <footer class="footer">
-    <div class="container footer-inner">
-      <div>
-        <strong>Módulo 3 — Sistemas de Coordenadas y Preparación de Datos</strong>
-        <p>Curso ArcMap 10.8 desde Cero · Colombia · 2026</p>
-      </div>
-      <a href="#inicio">Volver arriba ↑</a>
-    </div>
-  </footer>
-</body>
-</html>
+  </div>
+  <div class="section-header" style="margin-top:34px;"><span class="kicker">✅ Resumen del módulo</span><h2>Lo que debes recordar</h2></div>
+  <div class="summary-points">
+    <article class="summary-box"><h3>Qué aprendiste</h3><p>Qué son los sistemas de coordenadas, qué diferencia hay entre grados y metros, y cómo se relacionan datum y proyección.</p></article>
+    <article class="summary-box"><h3>Qué hiciste</h3><p>Revisaste las capas y aprendiste a corregirlas o proyectarlas antes de cualquier análisis.</p></article>
+    <article class="summary-box"><h3>Qué sigue</h3><p>En el Módulo 4 trabajarás con capas vectoriales, tabla de atributos, joins, selección y edición.</p></article>
+  </div>
+</div></section>
+</main>
+<footer class="footer"><div class="container footer-inner"><div><strong>Módulo 3 — Sistemas de Coordenadas y Preparación de Datos</strong><p>Curso ArcMap 10.8 desde Cero · Colombia · 2026</p></div><a href="#inicio">Volver arriba ↑</a></div></footer>
+</body></html>
